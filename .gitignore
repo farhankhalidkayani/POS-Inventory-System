@@ -141,3 +141,13 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Prisma generated client
+apps/api/src/generated/
+
+# Turborepo
+.turbo/
+
+# Env files (local overrides)
+.env.local
+

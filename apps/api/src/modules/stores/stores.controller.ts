@@ -1,18 +1,18 @@
-import type { FastifyReply, FastifyRequest } from "fastify";
-import { UnauthorizedError } from "../../shared/errors/AppError.js";
+import { Controller, Get, UseGuards } from "@nestjs/common";
+import { AuthGuard } from "../../shared/security/auth.guard.js";
+import { CurrentAuth } from "../../shared/security/currentAuth.decorator.js";
+import type { AuthContext } from "../../shared/security/authContext.js";
 import { toStoreResponse } from "../auth/dto/auth.mapper.js";
-import type { ListStoresForOrganizationUseCase } from "./usecases/ListStoresForOrganization.usecase.js";
+import { ListStoresForOrganizationUseCase } from "./usecases/ListStoresForOrganization.usecase.js";
 
+@Controller("api/stores")
 export class StoresController {
   constructor(private readonly listStoresForOrganization: ListStoresForOrganizationUseCase) {}
 
-  list = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
-    const context = request.authContext;
-    if (!context) {
-      throw new UnauthorizedError("Authentication required");
-    }
-
-    const stores = await this.listStoresForOrganization.execute(context.organizationId);
-    reply.status(200).send(stores.map(toStoreResponse));
-  };
+  @Get()
+  @UseGuards(AuthGuard)
+  async list(@CurrentAuth() auth: AuthContext) {
+    const stores = await this.listStoresForOrganization.execute(auth.organizationId);
+    return stores.map(toStoreResponse);
+  }
 }

@@ -1,13 +1,15 @@
+import { Inject, Injectable } from "@nestjs/common";
 import type { LoginRequest } from "@pos/shared";
 import { UnauthorizedError } from "../../../shared/errors/AppError.js";
+import { ORGANIZATIONS_REPOSITORY, STORES_REPOSITORY, USERS_REPOSITORY } from "../../../shared/di/tokens.js";
 import type { Organization } from "../../organizations/entities/Organization.js";
 import type { OrganizationsRepository } from "../../organizations/repositories/organizations.repository.js";
 import type { Store } from "../../stores/entities/Store.js";
 import type { StoresRepository } from "../../stores/repositories/stores.repository.js";
 import type { User } from "../../users/entities/User.js";
 import type { UsersRepository } from "../../users/repositories/users.repository.js";
-import type { PasswordService } from "../services/PasswordService.js";
-import type { TokenService } from "../services/TokenService.js";
+import { PasswordService } from "../services/PasswordService.js";
+import { TokenService } from "../../../shared/security/token.service.js";
 
 export interface LoginUserResult {
   organization: Organization;
@@ -17,11 +19,12 @@ export interface LoginUserResult {
   refreshToken: string;
 }
 
+@Injectable()
 export class LoginUserUseCase {
   constructor(
-    private readonly usersRepository: UsersRepository,
-    private readonly organizationsRepository: OrganizationsRepository,
-    private readonly storesRepository: StoresRepository,
+    @Inject(USERS_REPOSITORY) private readonly usersRepository: UsersRepository,
+    @Inject(ORGANIZATIONS_REPOSITORY) private readonly organizationsRepository: OrganizationsRepository,
+    @Inject(STORES_REPOSITORY) private readonly storesRepository: StoresRepository,
     private readonly passwordService: PasswordService,
     private readonly tokenService: TokenService
   ) {}

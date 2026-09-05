@@ -16,23 +16,31 @@ enum Role {
 }
 
 model Organization {
-  id        String   @id @default(cuid())
-  name      String
-  slug      String   @unique
-  stores    Store[]
-  users     User[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String          @id @default(cuid())
+  name           String
+  slug           String          @unique
+  stores         Store[]
+  users          User[]
+  categories     Category[]
+  products       Product[]
+  inventoryItems InventoryItem[]
+  stockMovements StockMovement[]
+  sales          Sale[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 }
 
 model Store {
-  id             String       @id @default(cuid())
+  id             String          @id @default(cuid())
   organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id])
+  organization   Organization    @relation(fields: [organizationId], references: [id])
   name           String
   address        String?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  inventoryItems InventoryItem[]
+  stockMovements StockMovement[]
+  sales          Sale[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 
   @@index([organizationId])
 }
@@ -46,8 +54,120 @@ model User {
   firstName      String
   lastName       String
   role           Role
+  sales          Sale[]
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
   @@index([organizationId])
+}
+
+enum StockMovementType {
+  RECEIVE
+  SALE
+  ADJUSTMENT
+}
+
+model Category {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  name           String
+  products       Product[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([organizationId, name])
+  @@index([organizationId])
+}
+
+model Product {
+  id             String          @id @default(cuid())
+  organizationId String
+  organization   Organization    @relation(fields: [organizationId], references: [id])
+  categoryId     String?
+  category       Category?       @relation(fields: [categoryId], references: [id])
+  sku            String
+  name           String
+  description    String?
+  barcode        String?
+  priceCents     Int
+  inventoryItems InventoryItem[]
+  stockMovements StockMovement[]
+  saleLineItems  SaleLineItem[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@unique([organizationId, sku])
+  @@index([organizationId])
+  @@index([categoryId])
+}
+
+model InventoryItem {
+  id                String   @id @default(cuid())
+  organizationId    String
+  organization      Organization @relation(fields: [organizationId], references: [id])
+  storeId           String
+  store             Store    @relation(fields: [storeId], references: [id])
+  productId         String
+  product           Product  @relation(fields: [productId], references: [id])
+  quantity          Int      @default(0)
+  reorderThreshold  Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([storeId, productId])
+  @@index([organizationId])
+  @@index([storeId])
+}
+
+model StockMovement {
+  id             String            @id @default(cuid())
+  organizationId String
+  organization   Organization      @relation(fields: [organizationId], references: [id])
+  storeId        String
+  store          Store             @relation(fields: [storeId], references: [id])
+  productId      String
+  product        Product           @relation(fields: [productId], references: [id])
+  type           StockMovementType
+  quantityChange Int
+  note           String?
+  createdAt      DateTime          @default(now())
+
+  @@index([organizationId])
+  @@index([storeId, productId])
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+}
+
+model Sale {
+  id             String         @id @default(cuid())
+  organizationId String
+  organization   Organization   @relation(fields: [organizationId], references: [id])
+  storeId        String
+  store          Store          @relation(fields: [storeId], references: [id])
+  userId         String
+  user           User           @relation(fields: [userId], references: [id])
+  paymentMethod  PaymentMethod
+  totalCents     Int
+  lineItems      SaleLineItem[]
+  createdAt      DateTime       @default(now())
+
+  @@index([organizationId])
+  @@index([storeId])
+}
+
+model SaleLineItem {
+  id             String  @id @default(cuid())
+  saleId         String
+  sale           Sale    @relation(fields: [saleId], references: [id])
+  productId      String
+  product        Product @relation(fields: [productId], references: [id])
+  quantity       Int
+  unitPriceCents Int
+  lineTotalCents Int
+
+  @@index([saleId])
 }

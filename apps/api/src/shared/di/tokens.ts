@@ -1,0 +1,12 @@
+export const ENV = Symbol("ENV");
+export const ORGANIZATIONS_REPOSITORY = Symbol("OrganizationsRepository");
+export const STORES_REPOSITORY = Symbol("StoresRepository");
+export const USERS_REPOSITORY = Symbol("UsersRepository");
+export const AUTH_UNIT_OF_WORK = Symbol("AuthUnitOfWork");
+export const CATEGORIES_REPOSITORY = Symbol("CategoriesRepository");
+export const PRODUCTS_REPOSITORY = Symbol("ProductsRepository");
+export const INVENTORY_REPOSITORY = Symbol("InventoryRepository");
+export const STOCK_MOVEMENTS_REPOSITORY = Symbol("StockMovementsRepository");
+export const INVENTORY_UNIT_OF_WORK = Symbol("InventoryUnitOfWork");
+export const SALES_REPOSITORY = Symbol("SalesRepository");
+export const SALES_UNIT_OF_WORK = Symbol("SalesUnitOfWork");

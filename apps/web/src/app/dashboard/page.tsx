@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAuthSession, useLogout } from "../../features/auth";
 import { Button } from "../../shared/components/ui/Button";
 import { Card } from "../../shared/components/ui/Card";
@@ -39,8 +40,22 @@ export default function DashboardPage() {
           <dt className="text-slate-500">Store</dt>
           <dd className="text-slate-900">{session.store?.name ?? "No store assigned"}</dd>
         </dl>
+        <div className="mt-6 flex gap-3">
+          <Link href="/checkout" className="text-sm font-medium text-slate-900 underline">
+            Checkout
+          </Link>
+          <Link href="/products" className="text-sm font-medium text-slate-900 underline">
+            Products
+          </Link>
+          <Link href="/inventory" className="text-sm font-medium text-slate-900 underline">
+            Inventory
+          </Link>
+          <Link href="/sales" className="text-sm font-medium text-slate-900 underline">
+            Sales
+          </Link>
+        </div>
         <Button
-          className="mt-6"
+          className="mt-4"
           variant="secondary"
           onClick={() => logoutMutation.mutate()}
           isLoading={logoutMutation.isPending}

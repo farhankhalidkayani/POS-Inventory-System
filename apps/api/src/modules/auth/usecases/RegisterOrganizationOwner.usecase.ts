@@ -1,12 +1,14 @@
+import { Inject, Injectable } from "@nestjs/common";
 import type { RegisterOrganizationRequest } from "@pos/shared";
 import { ConflictError } from "../../../shared/errors/AppError.js";
 import { slugify } from "../../../shared/utils/slugify.js";
+import { AUTH_UNIT_OF_WORK } from "../../../shared/di/tokens.js";
 import type { Organization } from "../../organizations/entities/Organization.js";
 import type { Store } from "../../stores/entities/Store.js";
 import type { User } from "../../users/entities/User.js";
 import type { AuthUnitOfWork } from "../services/AuthUnitOfWork.js";
-import type { PasswordService } from "../services/PasswordService.js";
-import type { TokenService } from "../services/TokenService.js";
+import { PasswordService } from "../services/PasswordService.js";
+import { TokenService } from "../../../shared/security/token.service.js";
 
 export interface RegisterOrganizationOwnerResult {
   organization: Organization;
@@ -16,9 +18,10 @@ export interface RegisterOrganizationOwnerResult {
   refreshToken: string;
 }
 
+@Injectable()
 export class RegisterOrganizationOwnerUseCase {
   constructor(
-    private readonly unitOfWork: AuthUnitOfWork,
+    @Inject(AUTH_UNIT_OF_WORK) private readonly unitOfWork: AuthUnitOfWork,
     private readonly passwordService: PasswordService,
     private readonly tokenService: TokenService
   ) {}

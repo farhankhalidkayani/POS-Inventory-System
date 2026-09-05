@@ -1,15 +1,18 @@
+import { Inject, Injectable } from "@nestjs/common";
 import { UnauthorizedError } from "../../../shared/errors/AppError.js";
+import { USERS_REPOSITORY } from "../../../shared/di/tokens.js";
 import type { UsersRepository } from "../../users/repositories/users.repository.js";
-import type { TokenService } from "../services/TokenService.js";
+import { TokenService } from "../../../shared/security/token.service.js";
 
 export interface RefreshTokenResult {
   accessToken: string;
   refreshToken: string;
 }
 
+@Injectable()
 export class RefreshTokenUseCase {
   constructor(
-    private readonly usersRepository: UsersRepository,
+    @Inject(USERS_REPOSITORY) private readonly usersRepository: UsersRepository,
     private readonly tokenService: TokenService
   ) {}
 

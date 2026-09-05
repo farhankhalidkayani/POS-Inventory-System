@@ -1,10 +1,14 @@
+import { Body, Controller, Get, HttpCode, Post, Req, Res, UseGuards } from "@nestjs/common";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { loginRequestSchema, registerOrganizationRequestSchema } from "@pos/shared";
 import { UnauthorizedError } from "../../shared/errors/AppError.js";
-import type { GetCurrentUserUseCase } from "./usecases/GetCurrentUser.usecase.js";
-import type { LoginUserUseCase } from "./usecases/LoginUser.usecase.js";
-import type { RefreshTokenUseCase } from "./usecases/RefreshToken.usecase.js";
-import type { RegisterOrganizationOwnerUseCase } from "./usecases/RegisterOrganizationOwner.usecase.js";
+import { AuthGuard } from "../../shared/security/auth.guard.js";
+import { CurrentAuth } from "../../shared/security/currentAuth.decorator.js";
+import type { AuthContext } from "../../shared/security/authContext.js";
+import { GetCurrentUserUseCase } from "./usecases/GetCurrentUser.usecase.js";
+import { LoginUserUseCase } from "./usecases/LoginUser.usecase.js";
+import { RefreshTokenUseCase } from "./usecases/RefreshToken.usecase.js";
+import { RegisterOrganizationOwnerUseCase } from "./usecases/RegisterOrganizationOwner.usecase.js";
 import { toAuthSessionResponse, toCurrentUserResponse } from "./dto/auth.mapper.js";
 
 export const REFRESH_TOKEN_COOKIE = "pos_refresh_token";
@@ -16,6 +20,7 @@ const REFRESH_COOKIE_OPTIONS = {
   secure: process.env.NODE_ENV === "production",
 };
 
+@Controller("api/auth")
 export class AuthController {
   constructor(
     private readonly registerOrganizationOwner: RegisterOrganizationOwnerUseCase,
@@ -24,16 +29,19 @@ export class AuthController {
     private readonly getCurrentUser: GetCurrentUserUseCase
   ) {}
 
-  register = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
-    const input = registerOrganizationRequestSchema.parse(request.body);
+  @Post("register")
+  async register(@Body() body: unknown, @Res({ passthrough: true }) reply: FastifyReply) {
+    const input = registerOrganizationRequestSchema.parse(body);
     const result = await this.registerOrganizationOwner.execute(input);
 
     reply.setCookie(REFRESH_TOKEN_COOKIE, result.refreshToken, REFRESH_COOKIE_OPTIONS);
-    reply.status(201).send(toAuthSessionResponse(result));
-  };
+    reply.status(201);
+    return toAuthSessionResponse(result);
+  }
 
-  login = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
-    const input = loginRequestSchema.parse(request.body);
+  @Post("login")
+  async login(@Body() body: unknown, @Res({ passthrough: true }) reply: FastifyReply) {
+    const input = loginRequestSchema.parse(body);
     const result = await this.loginUser.execute(input);
 
     if (!result.store) {
@@ -41,10 +49,13 @@ export class AuthController {
     }
 
     reply.setCookie(REFRESH_TOKEN_COOKIE, result.refreshToken, REFRESH_COOKIE_OPTIONS);
-    reply.status(200).send(toAuthSessionResponse({ ...result, store: result.store }));
-  };
+    reply.status(200);
+    return toAuthSessionResponse({ ...result, store: result.store });
+  }
 
-  refresh = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+  @Post("refresh")
+  @HttpCode(200)
+  async refresh(@Req() request: FastifyRequest, @Res({ passthrough: true }) reply: FastifyReply) {
     const token = request.cookies[REFRESH_TOKEN_COOKIE];
     if (!token) {
       throw new UnauthorizedError("Missing refresh token");
@@ -53,21 +64,19 @@ export class AuthController {
     const result = await this.refreshToken.execute(token);
 
     reply.setCookie(REFRESH_TOKEN_COOKIE, result.refreshToken, REFRESH_COOKIE_OPTIONS);
-    reply.status(200).send({ accessToken: result.accessToken });
-  };
+    return { accessToken: result.accessToken };
+  }
 
-  logout = async (_request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+  @Post("logout")
+  async logout(@Res({ passthrough: true }) reply: FastifyReply) {
     reply.clearCookie(REFRESH_TOKEN_COOKIE, { path: "/api/auth" });
-    reply.status(204).send();
-  };
+    reply.status(204);
+  }
 
-  me = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
-    const context = request.authContext;
-    if (!context) {
-      throw new UnauthorizedError("Authentication required");
-    }
-
-    const result = await this.getCurrentUser.execute(context.organizationId, context.userId);
-    reply.status(200).send(toCurrentUserResponse(result));
-  };
+  @Get("me")
+  @UseGuards(AuthGuard)
+  async me(@CurrentAuth() auth: AuthContext) {
+    const result = await this.getCurrentUser.execute(auth.organizationId, auth.userId);
+    return toCurrentUserResponse(result);
+  }
 }

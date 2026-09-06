@@ -16,5 +16,6 @@ export const platformOrganizationResponseSchema = z.object({
   createdAt: z.string(),
   approvedAt: z.string().nullable(),
   rejectedAt: z.string().nullable(),
+  suspendedAt: z.string().nullable(),
 });
 export type PlatformOrganizationResponse = z.infer<typeof platformOrganizationResponseSchema>;

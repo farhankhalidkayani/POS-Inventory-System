@@ -24,6 +24,10 @@ export class PrismaOrganizationsRepository implements OrganizationsRepository {
     return this.client.organization.findMany({ where: { status }, orderBy: { createdAt: "asc" } });
   }
 
+  async listAll(): Promise<Organization[]> {
+    return this.client.organization.findMany({ orderBy: { createdAt: "asc" } });
+  }
+
   async updateStatus(id: string, status: OrganizationStatus): Promise<Organization> {
     return this.client.organization.update({
       where: { id },
@@ -31,6 +35,7 @@ export class PrismaOrganizationsRepository implements OrganizationsRepository {
         status,
         approvedAt: status === "APPROVED" ? new Date() : undefined,
         rejectedAt: status === "REJECTED" ? new Date() : undefined,
+        suspendedAt: status === "SUSPENDED" ? new Date() : undefined,
       },
     });
   }

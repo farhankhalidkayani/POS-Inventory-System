@@ -16,5 +16,6 @@ export function toPlatformOrganizationResponse(
     createdAt: organization.createdAt.toISOString(),
     approvedAt: organization.approvedAt ? organization.approvedAt.toISOString() : null,
     rejectedAt: organization.rejectedAt ? organization.rejectedAt.toISOString() : null,
+    suspendedAt: organization.suspendedAt ? organization.suspendedAt.toISOString() : null,
   };
 }

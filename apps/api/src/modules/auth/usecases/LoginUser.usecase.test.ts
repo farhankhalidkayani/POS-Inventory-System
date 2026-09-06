@@ -106,6 +106,7 @@ describe("LoginUserUseCase", () => {
       findBySlug: vi.fn(),
       create: vi.fn(),
       listByStatus: vi.fn(),
+      listAll: vi.fn(),
       updateStatus: vi.fn(),
     };
     const storesRepository: StoresRepository = {

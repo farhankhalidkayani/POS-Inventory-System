@@ -6,5 +6,6 @@ export interface OrganizationsRepository {
   findById(id: string): Promise<Organization | null>;
   findBySlug(slug: string): Promise<Organization | null>;
   listByStatus(status: OrganizationStatus): Promise<Organization[]>;
+  listAll(): Promise<Organization[]>;
   updateStatus(id: string, status: OrganizationStatus): Promise<Organization>;
 }

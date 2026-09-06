@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthSession } from "../../../features/auth";
 import { AppShell } from "../../../shared/components/layout/AppShell";
-import { OrganizationApprovalList } from "../../../features/platform-admin";
+import { OrganizationsList } from "../../../features/platform-admin";
 import { Card } from "../../../shared/components/ui/Card";
 
 export default function PlatformAdminOrganizationsPage() {
@@ -26,9 +26,9 @@ export default function PlatformAdminOrganizationsPage() {
   }
 
   return (
-    <AppShell title="Organization Approvals">
+    <AppShell title="Organizations">
       <Card>
-        <OrganizationApprovalList />
+        <OrganizationsList />
       </Card>
     </AppShell>
   );

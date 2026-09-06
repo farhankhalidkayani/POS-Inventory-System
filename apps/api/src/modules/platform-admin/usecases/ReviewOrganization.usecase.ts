@@ -8,23 +8,37 @@ import type { OrganizationsRepository } from "../../organizations/repositories/o
 export class ReviewOrganizationUseCase {
   constructor(@Inject(ORGANIZATIONS_REPOSITORY) private readonly organizationsRepository: OrganizationsRepository) {}
 
+  /** Approves a pending or rejected signup, or reactivates a suspended organization. */
   async approve(organizationId: string): Promise<Organization> {
-    return this.transition(organizationId, "APPROVED");
+    const organization = await this.findOrThrow(organizationId);
+    if (organization.status === "APPROVED") {
+      throw new ConflictError("This organization is already approved");
+    }
+    return this.organizationsRepository.updateStatus(organizationId, "APPROVED");
   }
 
   async reject(organizationId: string): Promise<Organization> {
-    return this.transition(organizationId, "REJECTED");
+    const organization = await this.findOrThrow(organizationId);
+    if (organization.status !== "PENDING") {
+      throw new ConflictError("Only a pending organization can be rejected");
+    }
+    return this.organizationsRepository.updateStatus(organizationId, "REJECTED");
   }
 
-  private async transition(organizationId: string, target: "APPROVED" | "REJECTED"): Promise<Organization> {
+  /** Pauses an approved organization's access, e.g. for a billing issue. */
+  async suspend(organizationId: string): Promise<Organization> {
+    const organization = await this.findOrThrow(organizationId);
+    if (organization.status !== "APPROVED") {
+      throw new ConflictError("Only an approved organization can be suspended");
+    }
+    return this.organizationsRepository.updateStatus(organizationId, "SUSPENDED");
+  }
+
+  private async findOrThrow(organizationId: string): Promise<Organization> {
     const organization = await this.organizationsRepository.findById(organizationId);
     if (!organization) {
       throw new NotFoundError("Organization not found");
     }
-    if (organization.status !== "PENDING") {
-      throw new ConflictError(`This organization has already been ${organization.status.toLowerCase()}`);
-    }
-
-    return this.organizationsRepository.updateStatus(organizationId, target);
+    return organization;
   }
 }

@@ -19,7 +19,7 @@ export class PlatformAdminController {
   @Get()
   async list(@Query() query: unknown) {
     const { status } = listPendingOrganizationsQuerySchema.parse(query);
-    const results = await this.listOrganizationsForReview.execute(status ?? "PENDING");
+    const results = await this.listOrganizationsForReview.execute(status);
     return results.map(({ organization, owner }) => toPlatformOrganizationResponse(organization, owner));
   }
 
@@ -32,6 +32,12 @@ export class PlatformAdminController {
   @Post(":id/reject")
   async reject(@Param("id") id: string) {
     const organization = await this.reviewOrganization.reject(id);
+    return toPlatformOrganizationResponse(organization, null);
+  }
+
+  @Post(":id/suspend")
+  async suspend(@Param("id") id: string) {
+    const organization = await this.reviewOrganization.suspend(id);
     return toPlatformOrganizationResponse(organization, null);
   }
 }

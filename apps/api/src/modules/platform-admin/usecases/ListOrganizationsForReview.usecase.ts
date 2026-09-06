@@ -18,8 +18,10 @@ export class ListOrganizationsForReviewUseCase {
     @Inject(USERS_REPOSITORY) private readonly usersRepository: UsersRepository
   ) {}
 
-  async execute(status: OrganizationStatus): Promise<OrganizationForReview[]> {
-    const organizations = await this.organizationsRepository.listByStatus(status);
+  async execute(status?: OrganizationStatus): Promise<OrganizationForReview[]> {
+    const organizations = status
+      ? await this.organizationsRepository.listByStatus(status)
+      : await this.organizationsRepository.listAll();
 
     return Promise.all(
       organizations.map(async (organization) => {

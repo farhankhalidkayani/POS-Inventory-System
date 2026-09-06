@@ -18,6 +18,7 @@ enum OrganizationStatus {
   PENDING
   APPROVED
   REJECTED
+  SUSPENDED
 }
 
 model Organization {
@@ -27,6 +28,7 @@ model Organization {
   status         OrganizationStatus @default(PENDING)
   approvedAt     DateTime?
   rejectedAt     DateTime?
+  suspendedAt    DateTime?
   stores         Store[]
   users          User[]
   categories     Category[]

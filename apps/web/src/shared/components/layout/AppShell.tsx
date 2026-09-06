@@ -44,7 +44,7 @@ const NAV_ITEMS: NavItem[] = [
 
 const PLATFORM_ADMIN_ITEM: NavItem = {
   href: "/platform-admin/organizations",
-  label: "Organization Approvals",
+  label: "Organizations",
   icon: ShieldCheck,
 };
 
@@ -80,18 +80,27 @@ export function AppShell({ title, actions, children }: AppShellProps) {
   }
 
   if (!session.user.isPlatformAdmin && session.organization.status !== "APPROVED") {
-    const isRejected = session.organization.status === "REJECTED";
+    const status = session.organization.status;
+    const copy =
+      status === "REJECTED"
+        ? {
+            title: "Registration not approved",
+            body: `We're sorry, but the registration for ${session.organization.name} was not approved. Contact support if you believe this is a mistake.`,
+          }
+        : status === "SUSPENDED"
+          ? {
+              title: "Account suspended",
+              body: `Access for ${session.organization.name} has been suspended, often due to a billing issue. Contact support to resolve it and regain access.`,
+            }
+          : {
+              title: "Approval pending",
+              body: `Thanks for signing up! ${session.organization.name} is waiting for approval before you can start using the platform. We'll let you know once it's reviewed.`,
+            };
     return (
       <main className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
         <Card narrow>
-          <h1 className="mb-2 text-xl font-semibold text-slate-900">
-            {isRejected ? "Registration not approved" : "Approval pending"}
-          </h1>
-          <p className="text-sm text-slate-600">
-            {isRejected
-              ? `We're sorry, but the registration for ${session.organization.name} was not approved. Contact support if you believe this is a mistake.`
-              : `Thanks for signing up! ${session.organization.name} is waiting for approval before you can start using the platform. We'll let you know once it's reviewed.`}
-          </p>
+          <h1 className="mb-2 text-xl font-semibold text-slate-900">{copy.title}</h1>
+          <p className="text-sm text-slate-600">{copy.body}</p>
           <Button
             className="mt-4"
             variant="secondary"
@@ -105,8 +114,9 @@ export function AppShell({ title, actions, children }: AppShellProps) {
     );
   }
 
-  const visibleItems = NAV_ITEMS.filter((item) => !item.roles || item.roles.includes(session.user.role));
-  const items = session.user.isPlatformAdmin ? [...visibleItems, PLATFORM_ADMIN_ITEM] : visibleItems;
+  const items = session.user.isPlatformAdmin
+    ? [PLATFORM_ADMIN_ITEM]
+    : NAV_ITEMS.filter((item) => !item.roles || item.roles.includes(session.user.role));
 
   return (
     <div className="flex min-h-screen bg-slate-50">

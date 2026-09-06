@@ -1,1 +1,1 @@
-export { OrganizationApprovalList } from "./components/OrganizationApprovalList";
+export { OrganizationsList } from "./components/OrganizationsList";

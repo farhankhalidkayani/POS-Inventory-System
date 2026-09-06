@@ -7,6 +7,7 @@ export interface Organization {
   status: OrganizationStatus;
   approvedAt: Date | null;
   rejectedAt: Date | null;
+  suspendedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }

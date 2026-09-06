@@ -14,21 +14,17 @@ The repo includes `render.yaml` (a Render "Blueprint") describing the service, s
 
 1. In the Render dashboard: **New → Blueprint**, connect the GitHub repo. Render will detect `render.yaml`.
 2. It defines one web service, `pos-api`, on the free plan, running:
-   - **Build**: installs dependencies (including devDependencies — needed for the TypeScript/Prisma CLI at build and pre-deploy time) and builds `apps/api` and its `@pos/shared` dependency via Turborepo.
-   - **Pre-deploy**: runs `prisma migrate deploy` (applies schema migrations) then the seed script (idempotent — creates/updates the platform-admin account) against the target database, before the new version takes traffic.
+   - **Build**: installs dependencies (including devDependencies — needed for the TypeScript/Prisma CLI), builds `apps/api` and its `@pos/shared` dependency via Turborepo, then runs `prisma migrate deploy` (applies schema migrations) and the seed script (idempotent — creates/updates the platform-admin account) against the target database. All chained into `buildCommand` — Render's free tier doesn't support a separate `preDeployCommand` step, so this is the free-tier-compatible equivalent; it just means migrations/seeding run on every build instead of only right before traffic cuts over, which is fine since both are idempotent.
    - **Start**: `node dist/main.js` — the real compiled build, not `ts-node`.
    - **Health check**: `GET /health`.
 3. Fill in the env vars marked `sync: false` in `render.yaml` (Render will prompt for these during Blueprint setup — they're not stored in the file):
-   - `DATABASE_URL` — your Postgres connection string, e.g. the Aiven one already used locally (`postgres://avnadmin:...@...:24425/defaultdb?sslmode=require&sslrootcert=./certs/aiven-ca.pem`). The relative `sslrootcert` path resolves correctly because `startCommand`/`preDeployCommand` both `cd apps/api` first.
+   - `DATABASE_URL` — your Postgres connection string, e.g. the Aiven one already used locally (`postgres://avnadmin:...@...:24425/defaultdb?sslmode=require&sslrootcert=./certs/aiven-ca.pem`). The relative `sslrootcert` path resolves correctly because both `buildCommand` and `startCommand` `cd apps/api` first.
    - `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET` — the secrets you generated above.
    - `PLATFORM_ADMIN_EMAIL`, `PLATFORM_ADMIN_PASSWORD` — credentials for the seeded platform-admin account (see `docs/ARCHITECTURE.md#organization-approval--platform-admin`).
    - `CORS_ORIGIN` — leave a placeholder for now (e.g. `https://placeholder.vercel.app`); you'll come back and set this to the real Vercel URL in step 3.
 4. Deploy. Once live, note the service URL, e.g. `https://pos-api-xxxx.onrender.com`.
 
-If `preDeployCommand` isn't supported on your Render plan/UI, run it once manually from the service's **Shell** tab after the first deploy:
-```
-cd apps/api && npx prisma migrate deploy && node --loader ts-node/esm prisma/seed.ts
-```
+If you're on a paid Render plan and want migrations to run only right before traffic cuts over (rather than on every build), move the `prisma migrate deploy && node --loader ts-node/esm prisma/seed.ts` tail of `buildCommand` into a `preDeployCommand` field instead.
 
 ## 2. Deploy the web app to Vercel
 

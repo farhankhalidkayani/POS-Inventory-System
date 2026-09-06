@@ -5,7 +5,7 @@ services:
     plan: free
     region: oregon
     rootDir: .
-    buildCommand: corepack enable && pnpm install --frozen-lockfile --prod=false && npx turbo run build --filter=@pos/api && cd apps/api && npx prisma migrate deploy && node --loader ts-node/esm prisma/seed.ts
+    buildCommand: pnpm install --frozen-lockfile --prod=false && npx turbo run build --filter=@pos/api && cd apps/api && npx prisma migrate deploy && node --loader ts-node/esm prisma/seed.ts
     startCommand: cd apps/api && node dist/main.js
     healthCheckPath: /health
     envVars:

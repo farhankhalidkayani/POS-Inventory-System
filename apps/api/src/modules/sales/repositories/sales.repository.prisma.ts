@@ -4,7 +4,9 @@ import type { SalesRepository } from "./sales.repository.js";
 
 type Client = PrismaClient | Prisma.TransactionClient;
 
-const WITH_LINE_ITEMS = { include: { lineItems: { include: { product: true } } } } as const;
+const WITH_LINE_ITEMS = {
+  include: { lineItems: { include: { product: true } }, customer: true, discount: true },
+} as const;
 
 type RawSale = Prisma.SaleGetPayload<typeof WITH_LINE_ITEMS>;
 
@@ -14,7 +16,14 @@ function toSaleWithLineItems(sale: RawSale): SaleWithLineItems {
     organizationId: sale.organizationId,
     storeId: sale.storeId,
     userId: sale.userId,
+    customerId: sale.customerId,
+    customerName: sale.customer ? `${sale.customer.firstName} ${sale.customer.lastName}` : null,
+    discountId: sale.discountId,
+    discountCode: sale.discount?.code ?? null,
     paymentMethod: sale.paymentMethod,
+    paymentReference: sale.paymentReference,
+    subtotalCents: sale.subtotalCents,
+    discountCents: sale.discountCents,
     totalCents: sale.totalCents,
     createdAt: sale.createdAt,
     lineItems: sale.lineItems.map((lineItem) => ({
@@ -38,7 +47,12 @@ export class PrismaSalesRepository implements SalesRepository {
         organizationId: input.organizationId,
         storeId: input.storeId,
         userId: input.userId,
+        customerId: input.customerId ?? null,
+        discountId: input.discountId ?? null,
         paymentMethod: input.paymentMethod,
+        paymentReference: input.paymentReference,
+        subtotalCents: input.subtotalCents,
+        discountCents: input.discountCents,
         totalCents: input.totalCents,
         lineItems: {
           create: input.lineItems.map((lineItem) => ({

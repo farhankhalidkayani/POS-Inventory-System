@@ -10,6 +10,8 @@ export type CreateSaleLineItemRequest = z.infer<typeof createSaleLineItemRequest
 export const createSaleRequestSchema = z.object({
   paymentMethod: z.enum(PAYMENT_METHODS),
   lineItems: z.array(createSaleLineItemRequestSchema).min(1),
+  customerId: z.string().optional(),
+  discountCode: z.string().optional(),
 });
 export type CreateSaleRequest = z.infer<typeof createSaleRequestSchema>;
 
@@ -26,7 +28,13 @@ export type SaleLineItemResponse = z.infer<typeof saleLineItemResponseSchema>;
 export const saleResponseSchema = z.object({
   id: z.string(),
   storeId: z.string(),
+  customerId: z.string().nullable(),
+  customerName: z.string().nullable(),
   paymentMethod: z.enum(PAYMENT_METHODS),
+  paymentReference: z.string().nullable(),
+  subtotalCents: z.number(),
+  discountCode: z.string().nullable(),
+  discountCents: z.number(),
   totalCents: z.number(),
   createdAt: z.string(),
   lineItems: z.array(saleLineItemResponseSchema),

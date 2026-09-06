@@ -7,6 +7,7 @@ import { PrismaInventoryRepository } from "./repositories/inventory.repository.p
 import { PrismaInventoryUnitOfWork } from "./services/InventoryUnitOfWork.prisma.js";
 import { GetStoreInventoryUseCase } from "./usecases/GetStoreInventory.usecase.js";
 import { AdjustStockUseCase } from "./usecases/AdjustStock.usecase.js";
+import { SetReorderThresholdUseCase } from "./usecases/SetReorderThreshold.usecase.js";
 import { InventoryController } from "./inventory.controller.js";
 
 @Module({
@@ -25,6 +26,8 @@ import { InventoryController } from "./inventory.controller.js";
     },
     GetStoreInventoryUseCase,
     AdjustStockUseCase,
+    SetReorderThresholdUseCase,
   ],
+  exports: [INVENTORY_REPOSITORY],
 })
 export class InventoryModule {}

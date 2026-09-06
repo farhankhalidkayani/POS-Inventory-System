@@ -36,3 +36,8 @@ export const adjustStockResponseSchema = z.object({
   movement: stockMovementResponseSchema,
 });
 export type AdjustStockResponse = z.infer<typeof adjustStockResponseSchema>;
+
+export const setReorderThresholdRequestSchema = z.object({
+  reorderThreshold: z.number().int().nonnegative(),
+});
+export type SetReorderThresholdRequest = z.infer<typeof setReorderThresholdRequestSchema>;

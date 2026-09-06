@@ -19,6 +19,19 @@ export class PrismaInventoryRepository implements InventoryRepository {
     });
   }
 
+  async setReorderThreshold(
+    organizationId: string,
+    storeId: string,
+    productId: string,
+    reorderThreshold: number
+  ): Promise<InventoryItem> {
+    return this.client.inventoryItem.upsert({
+      where: { storeId_productId: { storeId, productId } },
+      create: { organizationId, storeId, productId, quantity: 0, reorderThreshold },
+      update: { reorderThreshold },
+    });
+  }
+
   async listByStore(organizationId: string, storeId: string): Promise<InventoryItemWithProduct[]> {
     return this.client.inventoryItem.findMany({
       where: { organizationId, storeId },

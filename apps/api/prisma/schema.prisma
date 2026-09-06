@@ -26,6 +26,10 @@ model Organization {
   inventoryItems InventoryItem[]
   stockMovements StockMovement[]
   sales          Sale[]
+  suppliers      Supplier[]
+  purchaseOrders PurchaseOrder[]
+  customers      Customer[]
+  discounts      Discount[]
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
 }
@@ -39,6 +43,7 @@ model Store {
   inventoryItems InventoryItem[]
   stockMovements StockMovement[]
   sales          Sale[]
+  purchaseOrders PurchaseOrder[]
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
 
@@ -94,6 +99,7 @@ model Product {
   inventoryItems InventoryItem[]
   stockMovements StockMovement[]
   saleLineItems  SaleLineItem[]
+  purchaseOrderLineItems PurchaseOrderLineItem[]
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
 
@@ -143,20 +149,28 @@ enum PaymentMethod {
 }
 
 model Sale {
-  id             String         @id @default(cuid())
-  organizationId String
-  organization   Organization   @relation(fields: [organizationId], references: [id])
-  storeId        String
-  store          Store          @relation(fields: [storeId], references: [id])
-  userId         String
-  user           User           @relation(fields: [userId], references: [id])
-  paymentMethod  PaymentMethod
-  totalCents     Int
-  lineItems      SaleLineItem[]
-  createdAt      DateTime       @default(now())
+  id               String         @id @default(cuid())
+  organizationId   String
+  organization     Organization   @relation(fields: [organizationId], references: [id])
+  storeId          String
+  store            Store          @relation(fields: [storeId], references: [id])
+  userId           String
+  user             User           @relation(fields: [userId], references: [id])
+  customerId       String?
+  customer         Customer?      @relation(fields: [customerId], references: [id])
+  discountId       String?
+  discount         Discount?      @relation(fields: [discountId], references: [id])
+  paymentMethod    PaymentMethod
+  paymentReference String?
+  subtotalCents    Int            @default(0)
+  discountCents    Int            @default(0)
+  totalCents       Int
+  lineItems        SaleLineItem[]
+  createdAt        DateTime       @default(now())
 
   @@index([organizationId])
   @@index([storeId])
+  @@index([customerId])
 }
 
 model SaleLineItem {
@@ -170,4 +184,92 @@ model SaleLineItem {
   lineTotalCents Int
 
   @@index([saleId])
+}
+
+enum PurchaseOrderStatus {
+  ORDERED
+  RECEIVED
+  CANCELLED
+}
+
+model Supplier {
+  id             String          @id @default(cuid())
+  organizationId String
+  organization   Organization    @relation(fields: [organizationId], references: [id])
+  name           String
+  contactEmail   String?
+  contactPhone   String?
+  purchaseOrders PurchaseOrder[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([organizationId])
+}
+
+model PurchaseOrder {
+  id             String                  @id @default(cuid())
+  organizationId String
+  organization   Organization            @relation(fields: [organizationId], references: [id])
+  storeId        String
+  store          Store                   @relation(fields: [storeId], references: [id])
+  supplierId     String
+  supplier       Supplier                @relation(fields: [supplierId], references: [id])
+  status         PurchaseOrderStatus     @default(ORDERED)
+  totalCostCents Int
+  lineItems      PurchaseOrderLineItem[]
+  receivedAt     DateTime?
+  createdAt      DateTime                @default(now())
+  updatedAt      DateTime                @updatedAt
+
+  @@index([organizationId])
+  @@index([storeId])
+}
+
+model PurchaseOrderLineItem {
+  id               String        @id @default(cuid())
+  purchaseOrderId  String
+  purchaseOrder    PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
+  productId        String
+  product          Product       @relation(fields: [productId], references: [id])
+  quantityOrdered  Int
+  quantityReceived Int           @default(0)
+  unitCostCents    Int
+
+  @@index([purchaseOrderId])
+}
+
+model Customer {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  firstName      String
+  lastName       String
+  email          String?
+  phone          String?
+  sales          Sale[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([organizationId])
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED
+}
+
+model Discount {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  code           String
+  type           DiscountType
+  value          Int
+  active         Boolean      @default(true)
+  sales          Sale[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([organizationId, code])
+  @@index([organizationId])
 }

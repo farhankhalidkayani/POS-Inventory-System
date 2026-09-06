@@ -53,6 +53,7 @@ function buildRepositories(existingQuantity: number | null): InventoryUnitOfWork
         createdAt: new Date(),
         updatedAt: new Date(),
       })),
+      setReorderThreshold: vi.fn(),
       listByStore: vi.fn(),
     },
     stockMovements: {

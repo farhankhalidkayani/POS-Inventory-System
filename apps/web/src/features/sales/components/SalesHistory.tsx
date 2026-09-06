@@ -23,6 +23,16 @@ export function SalesHistory({ storeId }: { storeId: string | undefined }) {
             <span className="font-medium text-slate-900">{sale.paymentMethod}</span>
             <span className="font-semibold text-slate-900">{formatCentsAsCurrency(sale.totalCents)}</span>
           </div>
+          {sale.customerName || sale.discountCode ? (
+            <div className="mt-1 flex gap-3 text-xs text-slate-500">
+              {sale.customerName ? <span>Customer: {sale.customerName}</span> : null}
+              {sale.discountCode ? (
+                <span>
+                  Discount: {sale.discountCode} (-{formatCentsAsCurrency(sale.discountCents)})
+                </span>
+              ) : null}
+            </div>
+          ) : null}
           <ul className="mt-2 flex flex-col gap-1 text-sm text-slate-600">
             {sale.lineItems.map((lineItem) => (
               <li key={lineItem.id}>

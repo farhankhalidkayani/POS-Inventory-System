@@ -5,7 +5,12 @@ export interface Sale {
   organizationId: string;
   storeId: string;
   userId: string;
+  customerId: string | null;
+  discountId: string | null;
   paymentMethod: PaymentMethod;
+  paymentReference: string | null;
+  subtotalCents: number;
+  discountCents: number;
   totalCents: number;
   createdAt: Date;
 }
@@ -24,6 +29,8 @@ export interface SaleLineItemWithProduct extends SaleLineItem {
 }
 
 export interface SaleWithLineItems extends Sale {
+  customerName: string | null;
+  discountCode: string | null;
   lineItems: SaleLineItemWithProduct[];
 }
 
@@ -38,7 +45,12 @@ export interface CreateSaleInput {
   organizationId: string;
   storeId: string;
   userId: string;
+  customerId?: string | null;
+  discountId?: string | null;
   paymentMethod: PaymentMethod;
+  paymentReference: string | null;
+  subtotalCents: number;
+  discountCents: number;
   totalCents: number;
   lineItems: CreateSaleLineItemInput[];
 }

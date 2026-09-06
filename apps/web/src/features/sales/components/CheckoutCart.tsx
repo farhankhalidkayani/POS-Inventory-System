@@ -3,9 +3,11 @@
 import { useState } from "react";
 import type { PaymentMethod } from "@pos/shared";
 import { Button } from "../../../shared/components/ui/Button";
+import { Input } from "../../../shared/components/ui/Input";
 import { formatCentsAsCurrency } from "../../../shared/lib/formatCurrency";
 import { ApiError } from "../../../shared/api/httpClient";
 import { useProducts } from "../../catalog";
+import { useCustomers, useCreateCustomer } from "../../customers";
 import { useCreateSale } from "../hooks/useCreateSale";
 
 interface CartLine {
@@ -17,10 +19,15 @@ interface CartLine {
 
 export function CheckoutCart({ storeId }: { storeId: string | undefined }) {
   const { data: products } = useProducts();
+  const { data: customers } = useCustomers();
+  const createCustomer = useCreateCustomer();
   const createSale = useCreateSale(storeId);
   const [selectedProductId, setSelectedProductId] = useState("");
   const [quantity, setQuantity] = useState("1");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("CASH");
+  const [customerId, setCustomerId] = useState("");
+  const [newCustomerName, setNewCustomerName] = useState("");
+  const [discountCode, setDiscountCode] = useState("");
   const [cart, setCart] = useState<CartLine[]>([]);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -45,19 +52,38 @@ export function CheckoutCart({ storeId }: { storeId: string | undefined }) {
     setCart((prev) => prev.filter((line) => line.productId !== productId));
   }
 
+  async function handleCreateCustomer() {
+    const trimmed = newCustomerName.trim();
+    if (!trimmed) return;
+    const [firstName = trimmed, ...rest] = trimmed.split(" ");
+    const lastName = rest.join(" ") || firstName;
+    const customer = await createCustomer.mutateAsync({ firstName, lastName });
+    setNewCustomerName("");
+    setCustomerId(customer.id);
+  }
+
   async function handleCompleteSale() {
     if (cart.length === 0) return;
     setSuccessMessage(null);
     const sale = await createSale.mutateAsync({
       paymentMethod,
       lineItems: cart.map((line) => ({ productId: line.productId, quantity: line.quantity })),
+      customerId: customerId || undefined,
+      discountCode: discountCode || undefined,
     });
     setCart([]);
-    setSuccessMessage(`Sale completed — total ${formatCentsAsCurrency(sale.totalCents)}`);
+    setDiscountCode("");
+    const discountNote = sale.discountCents > 0 ? ` (discount: -${formatCentsAsCurrency(sale.discountCents)})` : "";
+    setSuccessMessage(`Sale completed — total ${formatCentsAsCurrency(sale.totalCents)}${discountNote}`);
   }
 
   const totalCents = cart.reduce((sum, line) => sum + line.unitPriceCents * line.quantity, 0);
-  const errorMessage = createSale.error instanceof ApiError ? createSale.error.message : null;
+  const errorMessage =
+    createSale.error instanceof ApiError
+      ? createSale.error.message
+      : createCustomer.error instanceof ApiError
+        ? createCustomer.error.message
+        : null;
 
   return (
     <div className="flex flex-col gap-4">
@@ -129,6 +155,46 @@ export function CheckoutCart({ storeId }: { storeId: string | undefined }) {
             </tbody>
           </table>
         )}
+      </div>
+
+      <div className="flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-4">
+        <div className="flex flex-col gap-1">
+          <label htmlFor="customerId" className="text-sm font-medium text-slate-700">
+            Customer (optional)
+          </label>
+          <select
+            id="customerId"
+            className="rounded-md border border-slate-300 px-3 py-2 text-sm"
+            value={customerId}
+            onChange={(event) => setCustomerId(event.target.value)}
+          >
+            <option value="">Walk-in customer</option>
+            {customers?.map((customer) => (
+              <option key={customer.id} value={customer.id}>
+                {customer.firstName} {customer.lastName}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="flex items-end gap-2">
+          <div className="flex-1">
+            <Input
+              label="New customer name"
+              name="newCustomerName"
+              value={newCustomerName}
+              onChange={(event) => setNewCustomerName(event.target.value)}
+            />
+          </div>
+          <Button type="button" variant="secondary" onClick={handleCreateCustomer} isLoading={createCustomer.isPending}>
+            Add customer
+          </Button>
+        </div>
+        <Input
+          label="Discount code (optional)"
+          name="discountCode"
+          value={discountCode}
+          onChange={(event) => setDiscountCode(event.target.value.toUpperCase())}
+        />
       </div>
 
       <div className="flex items-end justify-between gap-4 rounded-lg border border-slate-200 bg-white p-4">

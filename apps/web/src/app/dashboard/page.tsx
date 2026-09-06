@@ -53,6 +53,19 @@ export default function DashboardPage() {
           <Link href="/sales" className="text-sm font-medium text-slate-900 underline">
             Sales
           </Link>
+          {["OWNER", "ADMIN", "MANAGER"].includes(session.user.role) ? (
+            <>
+              <Link href="/reports" className="text-sm font-medium text-slate-900 underline">
+                Reports
+              </Link>
+              <Link href="/purchase-orders" className="text-sm font-medium text-slate-900 underline">
+                Purchase Orders
+              </Link>
+              <Link href="/discounts" className="text-sm font-medium text-slate-900 underline">
+                Discounts
+              </Link>
+            </>
+          ) : null}
         </div>
         <Button
           className="mt-4"

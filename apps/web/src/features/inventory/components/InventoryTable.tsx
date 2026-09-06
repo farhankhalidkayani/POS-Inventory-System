@@ -7,6 +7,7 @@ import { ApiError } from "../../../shared/api/httpClient";
 import { useProducts } from "../../catalog";
 import { useStoreInventory } from "../hooks/useStoreInventory";
 import { useAdjustStock } from "../hooks/useAdjustStock";
+import { useSetReorderThreshold } from "../hooks/useSetReorderThreshold";
 
 interface InventoryRow {
   product: ProductResponse;
@@ -19,7 +20,9 @@ export function InventoryTable({ storeId }: { storeId: string | undefined }) {
   const { data: products, isLoading: isLoadingProducts } = useProducts();
   const { data: inventoryItems, isLoading: isLoadingInventory } = useStoreInventory(storeId);
   const adjustStock = useAdjustStock(storeId);
+  const setReorderThreshold = useSetReorderThreshold(storeId);
   const [quantityChangeByProduct, setQuantityChangeByProduct] = useState<Record<string, string>>({});
+  const [reorderThresholdByProduct, setReorderThresholdByProduct] = useState<Record<string, string>>({});
 
   if (isLoadingProducts || isLoadingInventory) {
     return <p className="text-sm text-slate-600">Loading inventory...</p>;
@@ -49,7 +52,21 @@ export function InventoryTable({ storeId }: { storeId: string | undefined }) {
     setQuantityChangeByProduct((prev) => ({ ...prev, [productId]: "" }));
   }
 
-  const errorMessage = adjustStock.error instanceof ApiError ? adjustStock.error.message : null;
+  async function handleSetReorderThreshold(productId: string) {
+    const rawValue = reorderThresholdByProduct[productId];
+    const reorderThreshold = Number.parseInt(rawValue ?? "", 10);
+    if (!Number.isFinite(reorderThreshold) || reorderThreshold < 0) return;
+
+    await setReorderThreshold.mutateAsync({ productId, reorderThreshold });
+    setReorderThresholdByProduct((prev) => ({ ...prev, [productId]: "" }));
+  }
+
+  const errorMessage =
+    adjustStock.error instanceof ApiError
+      ? adjustStock.error.message
+      : setReorderThreshold.error instanceof ApiError
+        ? setReorderThreshold.error.message
+        : null;
 
   return (
     <div className="flex flex-col gap-3">
@@ -61,7 +78,8 @@ export function InventoryTable({ storeId }: { storeId: string | undefined }) {
             <th className="py-2 pr-4">Quantity</th>
             <th className="py-2 pr-4">Reorder at</th>
             <th className="py-2 pr-4">Status</th>
-            <th className="py-2 pr-4">Adjust</th>
+            <th className="py-2 pr-4">Adjust stock</th>
+            <th className="py-2 pr-4">Set reorder at</th>
           </tr>
         </thead>
         <tbody>
@@ -94,6 +112,27 @@ export function InventoryTable({ storeId }: { storeId: string | undefined }) {
                     isLoading={adjustStock.isPending && adjustStock.variables?.productId === row.product.id}
                   >
                     Apply
+                  </Button>
+                </div>
+              </td>
+              <td className="py-2 pr-4">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min="0"
+                    className="w-20 rounded-md border border-slate-300 px-2 py-1 text-sm"
+                    placeholder={String(row.reorderThreshold)}
+                    value={reorderThresholdByProduct[row.product.id] ?? ""}
+                    onChange={(event) =>
+                      setReorderThresholdByProduct((prev) => ({ ...prev, [row.product.id]: event.target.value }))
+                    }
+                  />
+                  <Button
+                    variant="secondary"
+                    onClick={() => handleSetReorderThreshold(row.product.id)}
+                    isLoading={setReorderThreshold.isPending && setReorderThreshold.variables?.productId === row.product.id}
+                  >
+                    Save
                   </Button>
                 </div>
               </td>

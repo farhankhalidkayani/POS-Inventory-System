@@ -10,6 +10,12 @@ import { CategoriesModule } from "./modules/categories/categories.module.js";
 import { ProductsModule } from "./modules/products/products.module.js";
 import { InventoryModule } from "./modules/inventory/inventory.module.js";
 import { SalesModule } from "./modules/sales/sales.module.js";
+import { ReportsModule } from "./modules/reports/reports.module.js";
+import { SuppliersModule } from "./modules/suppliers/suppliers.module.js";
+import { PurchaseOrdersModule } from "./modules/purchase-orders/purchase-orders.module.js";
+import { CustomersModule } from "./modules/customers/customers.module.js";
+import { DiscountsModule } from "./modules/discounts/discounts.module.js";
+import { PaymentsModule } from "./modules/payments/payments.module.js";
 import { HealthController } from "./health.controller.js";
 
 @Module({
@@ -25,6 +31,12 @@ import { HealthController } from "./health.controller.js";
     ProductsModule,
     InventoryModule,
     SalesModule,
+    ReportsModule,
+    SuppliersModule,
+    PurchaseOrdersModule,
+    CustomersModule,
+    DiscountsModule,
+    PaymentsModule,
   ],
   controllers: [HealthController],
 })

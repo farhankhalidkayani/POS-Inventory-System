@@ -15,7 +15,11 @@ async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, adapter);
   const env = app.get<Env>(ENV);
 
-  app.enableCors({ origin: env.CORS_ORIGIN, credentials: true });
+  app.enableCors({
+    origin: env.CORS_ORIGIN,
+    credentials: true,
+    methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
+  });
   await app.register(fastifyCookie);
   app.useGlobalFilters(new AppExceptionFilter());
 

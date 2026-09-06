@@ -14,7 +14,7 @@ A generic, white-label, multi-tenant Point-of-Sale and Inventory Management plat
 - **Reporting** — sales summaries, top products, low-stock alerts (OWNER/ADMIN/MANAGER only).
 - **Customers & discounts** — lightweight CRM fields on sales, percentage/fixed discount codes.
 
-See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for how it's built, [`docs/DATA_MODEL.md`](docs/DATA_MODEL.md) for the full schema, [`docs/API_REFERENCE.md`](docs/API_REFERENCE.md) for every endpoint, and [`docs/FRONTEND_GUIDE.md`](docs/FRONTEND_GUIDE.md) for the web app's structure.
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for how it's built, [`docs/DATA_MODEL.md`](docs/DATA_MODEL.md) for the full schema, [`docs/API_REFERENCE.md`](docs/API_REFERENCE.md) for every endpoint, [`docs/FRONTEND_GUIDE.md`](docs/FRONTEND_GUIDE.md) for the web app's structure, and [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) to deploy it (Vercel + Render).
 
 ## Tech stack
 

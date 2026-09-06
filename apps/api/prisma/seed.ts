@@ -26,7 +26,7 @@ async function main(): Promise<void> {
 
   await prisma.user.upsert({
     where: { email },
-    update: { isPlatformAdmin: true },
+    update: { passwordHash, firstName, lastName, isPlatformAdmin: true },
     create: {
       organizationId: organization.id,
       email,

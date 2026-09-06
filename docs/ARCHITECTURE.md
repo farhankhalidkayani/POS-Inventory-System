@@ -88,6 +88,16 @@ Domain errors extend `AppError` (`shared/errors/AppError.ts`): `ValidationError`
 
 **Role convention**: catalog/inventory/supplier/purchase-order/discount *writes* are OWNER/ADMIN/MANAGER-only. Checkout (creating a sale) and creating a customer are open to all authenticated roles, including CASHIER, since those are day-to-day cashier tasks. Reports and the team/invites list are OWNER/ADMIN/MANAGER-only (invites creation is OWNER/ADMIN-only — only an OWNER may invite another OWNER).
 
+### Organization approval & platform admin
+
+Every new `Organization` is created with `status: PENDING` (register still creates the org/store/owner-user and logs them in immediately — nothing about signup itself is blocked). What's gated is everything *after* that: `AuthGuard` reads `organizationStatus` and `isPlatformAdmin` straight off the verified JWT payload (both are embedded at sign time — see `token.service.ts`) and throws `ForbiddenError` on any request whose organization isn't `APPROVED`, unless the user `isPlatformAdmin`.
+
+Two routes are deliberately exempt via `@SkipOrgApprovalCheck()` (a `SetMetadata` decorator read the same way `RolesGuard` reads `@Roles`): `GET /api/auth/me` and `GET /api/organizations/me`. This is what lets a pending user's dashboard know *why* they're locked out instead of just erroring.
+
+Because the JWT is signed with the org's status at that moment, approval doesn't retroactively unlock an already-issued access token. It's picked up the next time a token is (re)issued — `RefreshToken.usecase.ts` re-fetches the organization from the DB on every refresh, so in practice a pending user is unlocked automatically on their next silent token refresh (the frontend's `AuthSessionProvider` refreshes on every mount), with no explicit re-login required.
+
+`isPlatformAdmin` is a `User` boolean that is **not settable through any API** — it only exists via `prisma/seed.ts` (env-configured: `PLATFORM_ADMIN_EMAIL`/`PLATFORM_ADMIN_PASSWORD`/etc, idempotent upsert) or direct DB access. A platform admin's own organization ("Platform", seeded pre-approved) is otherwise a completely normal tenant — the only special behavior is that `AuthGuard` bypasses the approval check for them and `PlatformAdminGuard` (checked via `@UseGuards(AuthGuard, PlatformAdminGuard)` on `PlatformAdminController`) is the only thing gating `/api/platform/organizations`: list pending/approved/rejected orgs, `POST :id/approve`, `POST :id/reject`. There's no separate admin login flow — platform admins sign in through the same `/login` page as everyone else.
+
 ## Frontend architecture (`apps/web`)
 
 Domain/feature-based, not layer-based. `app/` (the Next.js App Router) contains **no business logic or direct fetch calls** — pages are thin and compose components from `features/*`.

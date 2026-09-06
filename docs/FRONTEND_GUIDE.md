@@ -10,7 +10,8 @@
 | `app/(auth)/login/page.tsx` | `auth` | `LoginForm`. |
 | `app/(auth)/accept-invite/page.tsx` | `auth`, `team` | `AcceptInviteForm`; reads `?token=` from the URL, shows invite details, sets a password, logs in. |
 | `app/page.tsx` | `auth` | Root route — redirects to `/dashboard` or `/login` depending on session. |
-| `app/dashboard/page.tsx` | `auth` | Landing page after login; role-conditional nav to every other page. |
+| `app/dashboard/page.tsx` | `auth` | Landing page after login; role-conditional nav to every other page. If the caller's organization isn't `APPROVED` yet (and they aren't a platform admin), this renders a pending/rejected notice instead of the normal dashboard. |
+| `app/platform-admin/organizations/page.tsx` | `platform-admin` | `OrganizationApprovalList` — only reachable/rendered when `session.user.isPlatformAdmin` is true; redirects everyone else to `/dashboard`. |
 | `app/products/page.tsx` | `catalog` | `ProductForm` + `ProductList`. |
 | `app/inventory/page.tsx` | `inventory` | `InventoryTable` — stock levels, adjustments, reorder thresholds. |
 | `app/checkout/page.tsx` | `sales`, `catalog`, `customers`, `discounts` | `CheckoutCart` — the POS screen. |
@@ -73,6 +74,11 @@ Three independent read-only widgets composed on `/reports`, each backed by its o
 Exports: `TeamMemberList`, `InviteForm`, `InviteList`, `AcceptInviteForm`.
 
 `TeamMemberList` shows current org members and roles (read-only). `InviteForm` + `InviteList` (create/copy-link/revoke) are used on `/team`. `AcceptInviteForm` is used on the public `/accept-invite` page — it's the one place in `team` consumed outside an authenticated page, since the invitee doesn't have an account yet.
+
+### `features/platform-admin`
+Exports: `OrganizationApprovalList`.
+
+Only used by `/platform-admin/organizations`. Lists organizations with `status: PENDING` and Approve/Reject buttons per row; both mutations invalidate the pending-organizations query key. This feature is unrelated to any org's own roles — it's gated purely by `session.user.isPlatformAdmin`, which the frontend never sets itself (only the backend seed script grants it). See `ARCHITECTURE.md#organization-approval--platform-admin`.
 
 ## Shared layer (`shared/`)
 

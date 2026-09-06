@@ -5,6 +5,7 @@ A generic, white-label, multi-tenant Point-of-Sale and Inventory Management plat
 ## Feature overview
 
 - **Auth & organizations** — email/password auth with JWT access + refresh tokens; every account belongs to one `Organization`, which owns one or more `Store`s.
+- **Organization approval** — new organizations register in a `PENDING` state and can't use the platform until a platform admin approves them via a dedicated admin panel (`/platform-admin/organizations`). See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md#organization-approval--platform-admin).
 - **Team & roles** — four roles (`OWNER`, `ADMIN`, `MANAGER`, `CASHIER`); OWNER/ADMIN invite teammates via a shareable link (token-based, no email sending required).
 - **Catalog** — products, categories, barcodes.
 - **Inventory** — per-store stock levels, manual adjustments, configurable low-stock reorder thresholds.
@@ -61,12 +62,15 @@ docker compose up -d
 # 4. Run database migrations
 pnpm --filter api prisma migrate dev
 
-# 5. Start both apps in dev mode
+# 5. Seed the first platform admin (set PLATFORM_ADMIN_* env vars in apps/api/.env first)
+pnpm --filter api seed
+
+# 6. Start both apps in dev mode
 pnpm --filter api dev    # http://localhost:4000
 pnpm --filter web dev    # http://localhost:3000
 ```
 
-Then open `http://localhost:3000/register` to create your first organization.
+Then open `http://localhost:3000/register` to create your first organization — it will sit in a `PENDING` state until someone signs in with the seeded platform-admin account (default `platform-admin@pos.local` / `change-me-please` unless overridden) and approves it from `/platform-admin/organizations`.
 
 ### Common commands (run from repo root, or with `--filter <api|web|shared>`)
 
@@ -77,6 +81,7 @@ pnpm lint         # eslint across the workspace
 pnpm typecheck    # tsc --noEmit across the workspace
 pnpm test         # vitest (apps/api usecase unit tests)
 pnpm db:migrate   # prisma migrate dev (shortcut for apps/api)
+pnpm db:seed      # create/update the platform admin account (shortcut for apps/api)
 ```
 
 ### Postgres port note

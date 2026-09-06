@@ -13,7 +13,8 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "db:migrate": "pnpm --filter api prisma migrate dev",
-    "db:generate": "pnpm --filter api prisma generate"
+    "db:generate": "pnpm --filter api prisma generate",
+    "db:seed": "pnpm --filter api seed"
   },
   "devDependencies": {
     "turbo": "^2.3.3",

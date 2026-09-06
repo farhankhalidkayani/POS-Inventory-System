@@ -5,6 +5,7 @@ Base URL: `http://localhost:4000` (dev). All request/response bodies are validat
 ## Conventions
 
 - **Auth**: unless marked "public", every route requires `Authorization: Bearer <accessToken>`. `AuthGuard` decodes the token and scopes the request to `organizationId`.
+- **Organization approval**: `AuthGuard` also rejects with `403 FORBIDDEN` any request whose organization isn't `APPROVED` yet, unless the user is a platform admin or the route is marked exempt (`GET /api/auth/me`, `GET /api/organizations/me`, and everything under `/api/platform/organizations`). See `ARCHITECTURE.md#organization-approval--platform-admin`.
 - **Roles**: routes marked with a role list require `authContext.role` to be one of them (`RolesGuard` + `@Roles(...)`). No marking = any authenticated role.
 - **Errors**: `{ "error": { "code": "NOT_FOUND", "message": "..." } }` with a matching HTTP status (400/401/403/404/409, or 500 for anything unexpected). See `ARCHITECTURE.md#errors`.
 - **Money**: all `*Cents` fields are integers.
@@ -26,7 +27,17 @@ Refresh cookie: name `pos_refresh_token`, httpOnly, scoped to path `/api/auth`.
 
 | Method | Path | Auth | Description |
 |---|---|---|---|
-| GET | `/me` | required | Returns the caller's organization. |
+| GET | `/me` | required (exempt from approval gate) | Returns the caller's organization, including `status`. |
+
+## Platform admin — `/api/platform/organizations`
+
+Requires `isPlatformAdmin: true` on the caller (`PlatformAdminGuard`); no `RolesGuard`/`@Roles()` involved since this is orthogonal to org-scoped roles. Used to review new organization signups.
+
+| Method | Path | Body/Query | Description |
+|---|---|---|---|
+| GET | `/` | `?status=PENDING\|APPROVED\|REJECTED` (default `PENDING`) | Lists organizations in that status, each with the owner's name/email resolved from that org's members. |
+| POST | `/:id/approve` | — | Sets status to `APPROVED` (stamps `approvedAt`). Only valid from `PENDING` — `409 Conflict` otherwise. |
+| POST | `/:id/reject` | — | Sets status to `REJECTED` (stamps `rejectedAt`). Only valid from `PENDING` — `409 Conflict` otherwise. |
 
 ## Stores — `/api/stores`
 

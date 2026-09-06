@@ -12,6 +12,7 @@ Source of truth: [`apps/api/prisma/schema.prisma`](../apps/api/prisma/schema.pri
 | `PurchaseOrderStatus` | `ORDERED`, `PARTIALLY_RECEIVED`, `RECEIVED`, `CANCELLED` |
 | `DiscountType` | `PERCENTAGE`, `FIXED` |
 | `InviteStatus` | `PENDING`, `ACCEPTED`, `REVOKED` |
+| `OrganizationStatus` | `PENDING`, `APPROVED`, `REJECTED` |
 
 ## Tenancy & identity
 
@@ -23,6 +24,8 @@ The tenant root. Every other model (except line-item children scoped through a p
 | id | String | PK |
 | name | String | |
 | slug | String | `@unique` |
+| status | OrganizationStatus | `@default(PENDING)` — a new organization cannot be used until a platform admin approves it. See [`docs/ARCHITECTURE.md#organization-approval--platform-admin`](ARCHITECTURE.md#organization-approval--platform-admin). |
+| approvedAt / rejectedAt | DateTime? | both nullable, set by the platform-admin review action |
 | createdAt / updatedAt | DateTime | |
 
 Has-many: `Store`, `User`, `Category`, `Product`, `InventoryItem`, `StockMovement`, `Sale`, `Supplier`, `PurchaseOrder`, `Customer`, `Discount`, `Invite`.
@@ -47,6 +50,7 @@ Has-many: `InventoryItem`, `StockMovement`, `Sale`, `PurchaseOrder`. **Note**: t
 | passwordHash | String | bcrypt |
 | firstName / lastName | String | |
 | role | Role | |
+| isPlatformAdmin | Boolean | `@default(false)` — not settable via any API; only granted by the `prisma/seed.ts` script or direct DB access. Bypasses both role checks scoped to their own org and the organization-approval gate entirely. |
 | createdAt / updatedAt | DateTime | |
 
 Has-many: `Sale` (as the cashier who recorded it).

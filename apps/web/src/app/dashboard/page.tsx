@@ -26,6 +26,32 @@ export default function DashboardPage() {
     );
   }
 
+  if (!session.user.isPlatformAdmin && session.organization.status !== "APPROVED") {
+    const isRejected = session.organization.status === "REJECTED";
+    return (
+      <main className="flex min-h-screen items-center justify-center p-6">
+        <Card>
+          <h1 className="mb-2 text-xl font-semibold text-slate-900">
+            {isRejected ? "Registration not approved" : "Approval pending"}
+          </h1>
+          <p className="text-sm text-slate-600">
+            {isRejected
+              ? `We're sorry, but the registration for ${session.organization.name} was not approved. Contact support if you believe this is a mistake.`
+              : `Thanks for signing up! ${session.organization.name} is waiting for approval before you can start using the platform. We'll let you know once it's reviewed.`}
+          </p>
+          <Button
+            className="mt-4"
+            variant="secondary"
+            onClick={() => logoutMutation.mutate()}
+            isLoading={logoutMutation.isPending}
+          >
+            Log out
+          </Button>
+        </Card>
+      </main>
+    );
+  }
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-4 p-6">
       <Card>
@@ -68,6 +94,11 @@ export default function DashboardPage() {
                 Team
               </Link>
             </>
+          ) : null}
+          {session.user.isPlatformAdmin ? (
+            <Link href="/platform-admin/organizations" className="text-sm font-medium text-slate-900 underline">
+              Organization Approvals
+            </Link>
           ) : null}
         </div>
         <Button

@@ -15,10 +15,19 @@ enum Role {
   CASHIER
 }
 
+enum OrganizationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model Organization {
-  id             String          @id @default(cuid())
+  id             String             @id @default(cuid())
   name           String
-  slug           String          @unique
+  slug           String             @unique
+  status         OrganizationStatus @default(PENDING)
+  approvedAt     DateTime?
+  rejectedAt     DateTime?
   stores         Store[]
   users          User[]
   categories     Category[]
@@ -31,8 +40,10 @@ model Organization {
   customers      Customer[]
   discounts      Discount[]
   invites        Invite[]
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  @@index([status])
 }
 
 model Store {
@@ -60,6 +71,7 @@ model User {
   firstName      String
   lastName       String
   role           Role
+  isPlatformAdmin Boolean     @default(false)
   sales          Sale[]
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt

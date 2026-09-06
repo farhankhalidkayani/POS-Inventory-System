@@ -17,6 +17,7 @@ import { CustomersModule } from "./modules/customers/customers.module.js";
 import { DiscountsModule } from "./modules/discounts/discounts.module.js";
 import { PaymentsModule } from "./modules/payments/payments.module.js";
 import { InvitesModule } from "./modules/invites/invites.module.js";
+import { PlatformAdminModule } from "./modules/platform-admin/platform-admin.module.js";
 import { HealthController } from "./health.controller.js";
 
 @Module({
@@ -39,6 +40,7 @@ import { HealthController } from "./health.controller.js";
     DiscountsModule,
     PaymentsModule,
     InvitesModule,
+    PlatformAdminModule,
   ],
   controllers: [HealthController],
 })

@@ -1,6 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { UnauthorizedError } from "../../../shared/errors/AppError.js";
-import { USERS_REPOSITORY } from "../../../shared/di/tokens.js";
+import { ORGANIZATIONS_REPOSITORY, USERS_REPOSITORY } from "../../../shared/di/tokens.js";
+import type { OrganizationsRepository } from "../../organizations/repositories/organizations.repository.js";
 import type { UsersRepository } from "../../users/repositories/users.repository.js";
 import { TokenService } from "../../../shared/security/token.service.js";
 
@@ -13,6 +14,7 @@ export interface RefreshTokenResult {
 export class RefreshTokenUseCase {
   constructor(
     @Inject(USERS_REPOSITORY) private readonly usersRepository: UsersRepository,
+    @Inject(ORGANIZATIONS_REPOSITORY) private readonly organizationsRepository: OrganizationsRepository,
     private readonly tokenService: TokenService
   ) {}
 
@@ -29,10 +31,17 @@ export class RefreshTokenUseCase {
       throw new UnauthorizedError("Invalid or expired refresh token");
     }
 
+    const organization = await this.organizationsRepository.findById(user.organizationId);
+    if (!organization) {
+      throw new UnauthorizedError("Invalid or expired refresh token");
+    }
+
     const accessToken = this.tokenService.signAccessToken({
       userId: user.id,
       organizationId: user.organizationId,
       role: user.role,
+      organizationStatus: organization.status,
+      isPlatformAdmin: user.isPlatformAdmin,
     });
     const nextRefreshToken = this.tokenService.signRefreshToken({
       userId: user.id,

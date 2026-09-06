@@ -1,3 +1,4 @@
+import type { OrganizationStatus } from "@pos/shared";
 import type { Prisma, PrismaClient } from "../../../shared/db/prisma.js";
 import type { CreateOrganizationInput, Organization } from "../entities/Organization.js";
 import type { OrganizationsRepository } from "./organizations.repository.js";
@@ -17,5 +18,20 @@ export class PrismaOrganizationsRepository implements OrganizationsRepository {
 
   async findBySlug(slug: string): Promise<Organization | null> {
     return this.client.organization.findUnique({ where: { slug } });
+  }
+
+  async listByStatus(status: OrganizationStatus): Promise<Organization[]> {
+    return this.client.organization.findMany({ where: { status }, orderBy: { createdAt: "asc" } });
+  }
+
+  async updateStatus(id: string, status: OrganizationStatus): Promise<Organization> {
+    return this.client.organization.update({
+      where: { id },
+      data: {
+        status,
+        approvedAt: status === "APPROVED" ? new Date() : undefined,
+        rejectedAt: status === "REJECTED" ? new Date() : undefined,
+      },
+    });
   }
 }

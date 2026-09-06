@@ -3,6 +3,7 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import { loginRequestSchema, registerOrganizationRequestSchema } from "@pos/shared";
 import { UnauthorizedError } from "../../shared/errors/AppError.js";
 import { AuthGuard } from "../../shared/security/auth.guard.js";
+import { SkipOrgApprovalCheck } from "../../shared/security/skipOrgApproval.decorator.js";
 import { CurrentAuth } from "../../shared/security/currentAuth.decorator.js";
 import type { AuthContext } from "../../shared/security/authContext.js";
 import { GetCurrentUserUseCase } from "./usecases/GetCurrentUser.usecase.js";
@@ -75,6 +76,7 @@ export class AuthController {
 
   @Get("me")
   @UseGuards(AuthGuard)
+  @SkipOrgApprovalCheck()
   async me(@CurrentAuth() auth: AuthContext) {
     const result = await this.getCurrentUser.execute(auth.organizationId, auth.userId);
     return toCurrentUserResponse(result);

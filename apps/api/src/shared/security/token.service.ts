@@ -1,10 +1,12 @@
 import jwt from "jsonwebtoken";
-import type { Role } from "@pos/shared";
+import type { OrganizationStatus, Role } from "@pos/shared";
 
 export interface AccessTokenPayload {
   userId: string;
   organizationId: string;
   role: Role;
+  organizationStatus: OrganizationStatus;
+  isPlatformAdmin: boolean;
 }
 
 export interface RefreshTokenPayload {

@@ -75,6 +75,8 @@ export class AcceptInviteUseCase {
       userId: user.id,
       organizationId: organization.id,
       role: user.role,
+      organizationStatus: organization.status,
+      isPlatformAdmin: user.isPlatformAdmin,
     });
     const refreshToken = this.tokenService.signRefreshToken({
       userId: user.id,

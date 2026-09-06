@@ -8,6 +8,7 @@ export interface User {
   firstName: string;
   lastName: string;
   role: Role;
+  isPlatformAdmin: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

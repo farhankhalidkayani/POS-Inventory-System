@@ -15,6 +15,7 @@ function buildUser(overrides: Partial<User> = {}): User {
     firstName: "Ada",
     lastName: "Lovelace",
     role: "OWNER",
+    isPlatformAdmin: false,
     createdAt: new Date(),
     updatedAt: new Date(),
     ...overrides,
@@ -75,7 +76,16 @@ describe("LoginUserUseCase", () => {
 
   it("returns a session with tokens on valid credentials", async () => {
     const user = buildUser();
-    const organization = { id: "org_1", name: "Acme", slug: "acme", createdAt: new Date(), updatedAt: new Date() };
+    const organization = {
+      id: "org_1",
+      name: "Acme",
+      slug: "acme",
+      status: "APPROVED" as const,
+      approvedAt: new Date(),
+      rejectedAt: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
     const store = {
       id: "store_1",
       organizationId: "org_1",
@@ -95,6 +105,8 @@ describe("LoginUserUseCase", () => {
       findById: vi.fn().mockResolvedValue(organization),
       findBySlug: vi.fn(),
       create: vi.fn(),
+      listByStatus: vi.fn(),
+      updateStatus: vi.fn(),
     };
     const storesRepository: StoresRepository = {
       findFirstByOrganization: vi.fn().mockResolvedValue(store),

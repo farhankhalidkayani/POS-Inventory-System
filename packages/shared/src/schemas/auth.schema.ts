@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { ROLES } from "../enums/role.js";
+import { ORGANIZATION_STATUSES } from "../enums/organizationStatus.js";
 
 export const registerOrganizationRequestSchema = z.object({
   organizationName: z.string().min(2).max(120),
@@ -24,6 +25,7 @@ export const authUserResponseSchema = z.object({
   lastName: z.string(),
   role: z.enum(ROLES),
   organizationId: z.string(),
+  isPlatformAdmin: z.boolean(),
 });
 export type AuthUserResponse = z.infer<typeof authUserResponseSchema>;
 
@@ -31,6 +33,7 @@ export const organizationResponseSchema = z.object({
   id: z.string(),
   name: z.string(),
   slug: z.string(),
+  status: z.enum(ORGANIZATION_STATUSES),
 });
 export type OrganizationResponse = z.infer<typeof organizationResponseSchema>;
 

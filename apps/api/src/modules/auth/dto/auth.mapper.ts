@@ -17,11 +17,17 @@ export function toUserResponse(user: User): AuthUserResponse {
     lastName: user.lastName,
     role: user.role,
     organizationId: user.organizationId,
+    isPlatformAdmin: user.isPlatformAdmin,
   };
 }
 
 export function toOrganizationResponse(organization: Organization): OrganizationResponse {
-  return { id: organization.id, name: organization.name, slug: organization.slug };
+  return {
+    id: organization.id,
+    name: organization.name,
+    slug: organization.slug,
+    status: organization.status,
+  };
 }
 
 export function toStoreResponse(store: Store): StoreResponse {

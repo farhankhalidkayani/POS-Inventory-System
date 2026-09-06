@@ -3,17 +3,18 @@
 import { useState } from "react";
 import type { PurchaseOrderLineItemResponse } from "@pos/shared";
 import { formatCentsAsCurrency } from "../../../shared/lib/formatCurrency";
+import { Badge, type BadgeTone } from "../../../shared/components/ui/Badge";
 import { Button } from "../../../shared/components/ui/Button";
 import { ApiError } from "../../../shared/api/httpClient";
 import { useStorePurchaseOrders } from "../hooks/useStorePurchaseOrders";
 import { useReceivePurchaseOrder } from "../hooks/useReceivePurchaseOrder";
 import { useCancelPurchaseOrder } from "../hooks/useCancelPurchaseOrder";
 
-const STATUS_STYLES: Record<string, string> = {
-  ORDERED: "bg-amber-100 text-amber-700",
-  PARTIALLY_RECEIVED: "bg-blue-100 text-blue-700",
-  RECEIVED: "bg-green-100 text-green-700",
-  CANCELLED: "bg-slate-200 text-slate-600",
+const STATUS_TONES: Record<string, BadgeTone> = {
+  ORDERED: "warning",
+  PARTIALLY_RECEIVED: "info",
+  RECEIVED: "success",
+  CANCELLED: "neutral",
 };
 
 const RECEIVABLE_STATUSES = ["ORDERED", "PARTIALLY_RECEIVED"];
@@ -74,9 +75,7 @@ export function PurchaseOrderList({ storeId }: { storeId: string | undefined }) 
           <div key={po.id} className="rounded-lg border border-slate-200 bg-white p-4">
             <div className="flex items-center justify-between text-sm">
               <span className="font-medium text-slate-900">{po.supplierName}</span>
-              <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[po.status]}`}>
-                {po.status.replace("_", " ")}
-              </span>
+              <Badge tone={STATUS_TONES[po.status]}>{po.status.replace("_", " ")}</Badge>
               <span className="font-semibold text-slate-900">{formatCentsAsCurrency(po.totalCostCents)}</span>
             </div>
 

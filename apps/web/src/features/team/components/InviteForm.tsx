@@ -21,7 +21,7 @@ export function InviteForm() {
   const errorMessage = createInvite.error instanceof ApiError ? createInvite.error.message : null;
 
   return (
-    <form className="flex flex-col gap-4 rounded-lg border border-slate-200 bg-white p-6" onSubmit={handleSubmit}>
+    <form className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-6 shadow-card" onSubmit={handleSubmit}>
       <h2 className="text-lg font-semibold text-slate-900">Invite a teammate</h2>
       <div className="grid grid-cols-2 gap-3">
         <Input label="Email" name="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required />

@@ -24,7 +24,7 @@ export function DiscountForm() {
   const errorMessage = createDiscount.error instanceof ApiError ? createDiscount.error.message : null;
 
   return (
-    <form className="flex flex-col gap-4 rounded-lg border border-slate-200 bg-white p-6" onSubmit={handleSubmit}>
+    <form className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-6 shadow-card" onSubmit={handleSubmit}>
       <h2 className="text-lg font-semibold text-slate-900">New discount code</h2>
       <div className="grid grid-cols-3 gap-3">
         <Input label="Code" name="code" value={code} onChange={(event) => setCode(event.target.value.toUpperCase())} required />

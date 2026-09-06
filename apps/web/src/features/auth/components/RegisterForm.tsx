@@ -41,7 +41,7 @@ export function RegisterForm() {
   const errorMessage = registerMutation.error instanceof ApiError ? registerMutation.error.message : null;
 
   return (
-    <Card>
+    <Card narrow>
       <h1 className="mb-6 text-xl font-semibold text-slate-900">Create your organization</h1>
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         <Input label="Organization name" name="organizationName" value={form.organizationName} onChange={updateField("organizationName")} required />

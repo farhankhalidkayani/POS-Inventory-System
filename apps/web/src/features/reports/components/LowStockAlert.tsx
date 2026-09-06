@@ -10,7 +10,7 @@ export function LowStockAlert({ storeId }: { storeId: string | undefined }) {
   }
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-6">
+    <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-card">
       <h2 className="mb-4 text-lg font-semibold text-slate-900">Low stock</h2>
       {!lowStockItems || lowStockItems.length === 0 ? (
         <p className="text-sm text-slate-600">Everything is sufficiently stocked.</p>

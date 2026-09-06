@@ -27,7 +27,7 @@ export function LoginForm() {
   const errorMessage = loginMutation.error instanceof ApiError ? loginMutation.error.message : null;
 
   return (
-    <Card>
+    <Card narrow>
       <h1 className="mb-6 text-xl font-semibold text-slate-900">Log in</h1>
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         <Input

@@ -1,115 +1,106 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useAuthSession, useLogout } from "../../features/auth";
-import { Button } from "../../shared/components/ui/Button";
+import {
+  ShoppingCart,
+  Package,
+  Boxes,
+  Receipt,
+  BarChart3,
+  Truck,
+  Tag,
+  Users,
+  ShieldCheck,
+  type LucideIcon,
+} from "lucide-react";
+import { useAuthSession } from "../../features/auth";
+import { AppShell } from "../../shared/components/layout/AppShell";
 import { Card } from "../../shared/components/ui/Card";
 
-export default function DashboardPage() {
-  const router = useRouter();
-  const { session, isBootstrapping } = useAuthSession();
-  const logoutMutation = useLogout();
+interface QuickLink {
+  href: string;
+  label: string;
+  description: string;
+  icon: LucideIcon;
+  roles?: readonly string[];
+}
 
-  useEffect(() => {
-    if (!isBootstrapping && !session) {
-      router.replace("/login");
-    }
-  }, [isBootstrapping, session, router]);
+const QUICK_LINKS: QuickLink[] = [
+  { href: "/checkout", label: "Checkout", description: "Ring up a sale", icon: ShoppingCart },
+  { href: "/products", label: "Products", description: "Manage the catalog", icon: Package },
+  { href: "/inventory", label: "Inventory", description: "Stock levels & adjustments", icon: Boxes },
+  { href: "/sales", label: "Sales", description: "Sale history", icon: Receipt },
+  { href: "/reports", label: "Reports", description: "Summaries & alerts", icon: BarChart3, roles: ["OWNER", "ADMIN", "MANAGER"] },
+  { href: "/purchase-orders", label: "Purchase Orders", description: "Suppliers & receiving", icon: Truck, roles: ["OWNER", "ADMIN", "MANAGER"] },
+  { href: "/discounts", label: "Discounts", description: "Manage discount codes", icon: Tag, roles: ["OWNER", "ADMIN", "MANAGER"] },
+  { href: "/team", label: "Team", description: "Members & invites", icon: Users, roles: ["OWNER", "ADMIN", "MANAGER"] },
+];
+
+export default function DashboardPage() {
+  const { session, isBootstrapping } = useAuthSession();
 
   if (isBootstrapping || !session) {
     return (
-      <main className="flex min-h-screen items-center justify-center">
-        <p className="text-sm text-slate-600">Loading...</p>
+      <main className="flex min-h-screen items-center justify-center bg-slate-50">
+        <p className="text-sm text-slate-500">Loading...</p>
       </main>
     );
   }
 
-  if (!session.user.isPlatformAdmin && session.organization.status !== "APPROVED") {
-    const isRejected = session.organization.status === "REJECTED";
-    return (
-      <main className="flex min-h-screen items-center justify-center p-6">
-        <Card>
-          <h1 className="mb-2 text-xl font-semibold text-slate-900">
-            {isRejected ? "Registration not approved" : "Approval pending"}
-          </h1>
-          <p className="text-sm text-slate-600">
-            {isRejected
-              ? `We're sorry, but the registration for ${session.organization.name} was not approved. Contact support if you believe this is a mistake.`
-              : `Thanks for signing up! ${session.organization.name} is waiting for approval before you can start using the platform. We'll let you know once it's reviewed.`}
-          </p>
-          <Button
-            className="mt-4"
-            variant="secondary"
-            onClick={() => logoutMutation.mutate()}
-            isLoading={logoutMutation.isPending}
-          >
-            Log out
-          </Button>
-        </Card>
-      </main>
-    );
+  const links = QUICK_LINKS.filter((link) => !link.roles || link.roles.includes(session.user.role));
+  if (session.user.isPlatformAdmin) {
+    links.push({
+      href: "/platform-admin/organizations",
+      label: "Organization Approvals",
+      description: "Review pending sign-ups",
+      icon: ShieldCheck,
+    });
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-4 p-6">
-      <Card>
-        <h1 className="mb-4 text-xl font-semibold text-slate-900">
-          Welcome, {session.user.firstName} {session.user.lastName}
-        </h1>
-        <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
-          <dt className="text-slate-500">Role</dt>
-          <dd className="text-slate-900">{session.user.role}</dd>
-          <dt className="text-slate-500">Organization</dt>
-          <dd className="text-slate-900">{session.organization.name}</dd>
-          <dt className="text-slate-500">Store</dt>
-          <dd className="text-slate-900">{session.store?.name ?? "No store assigned"}</dd>
-        </dl>
-        <div className="mt-6 flex gap-3">
-          <Link href="/checkout" className="text-sm font-medium text-slate-900 underline">
-            Checkout
-          </Link>
-          <Link href="/products" className="text-sm font-medium text-slate-900 underline">
-            Products
-          </Link>
-          <Link href="/inventory" className="text-sm font-medium text-slate-900 underline">
-            Inventory
-          </Link>
-          <Link href="/sales" className="text-sm font-medium text-slate-900 underline">
-            Sales
-          </Link>
-          {["OWNER", "ADMIN", "MANAGER"].includes(session.user.role) ? (
-            <>
-              <Link href="/reports" className="text-sm font-medium text-slate-900 underline">
-                Reports
+    <AppShell title="Dashboard">
+      <div className="flex flex-col gap-6">
+        <Card>
+          <h2 className="text-lg font-semibold text-slate-900">
+            Welcome back, {session.user.firstName} {session.user.lastName}
+          </h2>
+          <dl className="mt-4 grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
+            <div className="flex justify-between sm:block">
+              <dt className="text-slate-500">Role</dt>
+              <dd className="font-medium text-slate-900">{session.user.role}</dd>
+            </div>
+            <div className="flex justify-between sm:block">
+              <dt className="text-slate-500">Organization</dt>
+              <dd className="font-medium text-slate-900">{session.organization.name}</dd>
+            </div>
+            <div className="flex justify-between sm:block">
+              <dt className="text-slate-500">Store</dt>
+              <dd className="font-medium text-slate-900">{session.store?.name ?? "No store assigned"}</dd>
+            </div>
+          </dl>
+        </Card>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {links.map((link) => {
+            const Icon = link.icon;
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="group flex items-start gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-card transition-colors duration-150 hover:border-primary-300 hover:bg-primary-50/40"
+              >
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-600 group-hover:bg-primary-100">
+                  <Icon className="h-5 w-5" />
+                </span>
+                <span>
+                  <span className="block text-sm font-semibold text-slate-900">{link.label}</span>
+                  <span className="block text-sm text-slate-500">{link.description}</span>
+                </span>
               </Link>
-              <Link href="/purchase-orders" className="text-sm font-medium text-slate-900 underline">
-                Purchase Orders
-              </Link>
-              <Link href="/discounts" className="text-sm font-medium text-slate-900 underline">
-                Discounts
-              </Link>
-              <Link href="/team" className="text-sm font-medium text-slate-900 underline">
-                Team
-              </Link>
-            </>
-          ) : null}
-          {session.user.isPlatformAdmin ? (
-            <Link href="/platform-admin/organizations" className="text-sm font-medium text-slate-900 underline">
-              Organization Approvals
-            </Link>
-          ) : null}
+            );
+          })}
         </div>
-        <Button
-          className="mt-4"
-          variant="secondary"
-          onClick={() => logoutMutation.mutate()}
-          isLoading={logoutMutation.isPending}
-        >
-          Log out
-        </Button>
-      </Card>
-    </main>
+      </div>
+    </AppShell>
   );
 }

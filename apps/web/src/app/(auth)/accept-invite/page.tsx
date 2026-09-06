@@ -3,15 +3,16 @@
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { AcceptInviteForm } from "../../../features/team";
+import { AuthLayout } from "../../../shared/components/layout/AuthLayout";
 
 function AcceptInvitePageContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-4 p-6">
+    <AuthLayout>
       <AcceptInviteForm token={token} />
-    </main>
+    </AuthLayout>
   );
 }
 

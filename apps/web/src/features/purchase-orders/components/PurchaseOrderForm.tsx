@@ -79,7 +79,7 @@ export function PurchaseOrderForm({ storeId }: { storeId: string | undefined }) 
         : null;
 
   return (
-    <div className="flex flex-col gap-4 rounded-lg border border-slate-200 bg-white p-6">
+    <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-6 shadow-card">
       <h2 className="text-lg font-semibold text-slate-900">New purchase order</h2>
 
       <div className="flex flex-col gap-1">

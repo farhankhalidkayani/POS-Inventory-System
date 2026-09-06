@@ -15,7 +15,7 @@ export function SalesSummaryCard({ storeId }: { storeId: string | undefined }) {
   }
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-6">
+    <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-card">
       <h2 className="mb-4 text-lg font-semibold text-slate-900">Last 7 days</h2>
       <div className="mb-4 flex gap-8">
         <div>

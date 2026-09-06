@@ -34,7 +34,7 @@ export function AcceptInviteForm({ token }: { token: string | null }) {
 
   if (!token) {
     return (
-      <Card>
+      <Card narrow>
         <p className="text-sm text-red-600">This invite link is missing a token.</p>
       </Card>
     );
@@ -42,7 +42,7 @@ export function AcceptInviteForm({ token }: { token: string | null }) {
 
   if (isLoading) {
     return (
-      <Card>
+      <Card narrow>
         <p className="text-sm text-slate-600">Loading invite...</p>
       </Card>
     );
@@ -51,7 +51,7 @@ export function AcceptInviteForm({ token }: { token: string | null }) {
   if (detailsError || !inviteDetails) {
     const message = detailsError instanceof ApiError ? detailsError.message : "This invite link is invalid.";
     return (
-      <Card>
+      <Card narrow>
         <p className="text-sm text-red-600">{message}</p>
       </Card>
     );
@@ -60,7 +60,7 @@ export function AcceptInviteForm({ token }: { token: string | null }) {
   const errorMessage = acceptInvite.error instanceof ApiError ? acceptInvite.error.message : null;
 
   return (
-    <Card>
+    <Card narrow>
       <h1 className="mb-2 text-xl font-semibold text-slate-900">Join {inviteDetails.organizationName}</h1>
       <p className="mb-6 text-sm text-slate-600">
         You&apos;ve been invited as <strong>{inviteDetails.role}</strong> ({inviteDetails.email}).

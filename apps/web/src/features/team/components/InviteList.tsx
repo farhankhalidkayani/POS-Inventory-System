@@ -1,14 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { Badge, type BadgeTone } from "../../../shared/components/ui/Badge";
 import { Button } from "../../../shared/components/ui/Button";
 import { useInvites } from "../hooks/useInvites";
 import { useRevokeInvite } from "../hooks/useRevokeInvite";
 
-const STATUS_STYLES: Record<string, string> = {
-  PENDING: "bg-amber-100 text-amber-700",
-  ACCEPTED: "bg-green-100 text-green-700",
-  REVOKED: "bg-slate-200 text-slate-600",
+const STATUS_TONES: Record<string, BadgeTone> = {
+  PENDING: "warning",
+  ACCEPTED: "success",
+  REVOKED: "neutral",
 };
 
 export function InviteList() {
@@ -51,9 +52,7 @@ export function InviteList() {
             <td className="py-2 pr-4 text-slate-900">{invite.email}</td>
             <td className="py-2 pr-4 text-slate-600">{invite.role}</td>
             <td className="py-2 pr-4">
-              <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[invite.status]}`}>
-                {invite.status}
-              </span>
+              <Badge tone={STATUS_TONES[invite.status]}>{invite.status}</Badge>
             </td>
             <td className="py-2 pr-4">
               {invite.status === "PENDING" ? (

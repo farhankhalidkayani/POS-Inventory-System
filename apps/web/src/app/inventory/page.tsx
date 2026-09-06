@@ -1,40 +1,18 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { useAuthSession } from "../../features/auth";
+import { AppShell } from "../../shared/components/layout/AppShell";
 import { InventoryTable } from "../../features/inventory";
+import { Card } from "../../shared/components/ui/Card";
 
 export default function InventoryPage() {
-  const router = useRouter();
-  const { session, isBootstrapping } = useAuthSession();
-
-  useEffect(() => {
-    if (!isBootstrapping && !session) {
-      router.replace("/login");
-    }
-  }, [isBootstrapping, session, router]);
-
-  if (isBootstrapping || !session) {
-    return (
-      <main className="flex min-h-screen items-center justify-center">
-        <p className="text-sm text-slate-600">Loading...</p>
-      </main>
-    );
-  }
+  const { session } = useAuthSession();
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-4xl flex-col gap-6 p-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-slate-900">Inventory — {session.store?.name ?? "No store"}</h1>
-        <Link href="/dashboard" className="text-sm font-medium text-slate-600 underline">
-          Back to dashboard
-        </Link>
-      </div>
-      <div className="rounded-lg border border-slate-200 bg-white p-6">
-        <InventoryTable storeId={session.store?.id} />
-      </div>
-    </main>
+    <AppShell title={`Inventory${session?.store?.name ? ` — ${session.store.name}` : ""}`}>
+      <Card>
+        <InventoryTable storeId={session?.store?.id} />
+      </Card>
+    </AppShell>
   );
 }

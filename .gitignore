@@ -151,6 +151,3 @@ apps/api/src/generated/
 # Env files (local overrides)
 .env.local
 
-# Cloud DB CA certs (instance-specific, not for the generic template)
-apps/api/certs/
-

@@ -14,11 +14,17 @@ import { toAuthSessionResponse, toCurrentUserResponse } from "./dto/auth.mapper.
 
 export const REFRESH_TOKEN_COOKIE = "pos_refresh_token";
 
+const isProduction = process.env.NODE_ENV === "production";
+
 export const REFRESH_COOKIE_OPTIONS = {
   httpOnly: true,
-  sameSite: "lax" as const,
+  // In production the frontend (Vercel) and API (Render) are different sites, so the
+  // refresh cookie must be SameSite=None (which requires Secure) to be sent on the
+  // frontend's cross-site fetch calls. Locally both run on "localhost" (same site,
+  // different ports), where Lax already works and Secure would require HTTPS.
+  sameSite: isProduction ? ("none" as const) : ("lax" as const),
   path: "/api/auth",
-  secure: process.env.NODE_ENV === "production",
+  secure: isProduction,
 };
 
 @Controller("api/auth")

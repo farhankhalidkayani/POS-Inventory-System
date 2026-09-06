@@ -24,6 +24,7 @@ export function ProductList() {
           <th className="py-2 pr-4">SKU</th>
           <th className="py-2 pr-4">Name</th>
           <th className="py-2 pr-4">Category</th>
+          <th className="py-2 pr-4">Barcode</th>
           <th className="py-2 pr-4">Price</th>
           <th className="py-2 pr-4" />
         </tr>
@@ -34,6 +35,7 @@ export function ProductList() {
             <td className="py-2 pr-4 text-slate-900">{product.sku}</td>
             <td className="py-2 pr-4 text-slate-900">{product.name}</td>
             <td className="py-2 pr-4 text-slate-600">{product.category?.name ?? "—"}</td>
+            <td className="py-2 pr-4 text-slate-600">{product.barcode ?? "—"}</td>
             <td className="py-2 pr-4 text-slate-900">{formatCentsAsCurrency(product.priceCents)}</td>
             <td className="py-2 pr-4">
               <Button

@@ -64,6 +64,9 @@ export default function DashboardPage() {
               <Link href="/discounts" className="text-sm font-medium text-slate-900 underline">
                 Discounts
               </Link>
+              <Link href="/team" className="text-sm font-medium text-slate-900 underline">
+                Team
+              </Link>
             </>
           ) : null}
         </div>

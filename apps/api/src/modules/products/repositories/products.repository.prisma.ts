@@ -33,6 +33,10 @@ export class PrismaProductsRepository implements ProductsRepository {
     return this.client.product.findFirst({ where: { organizationId, sku } });
   }
 
+  async findByBarcode(organizationId: string, barcode: string): Promise<ProductWithCategory | null> {
+    return this.client.product.findFirst({ where: { organizationId, barcode }, ...WITH_CATEGORY });
+  }
+
   async list(organizationId: string): Promise<ProductWithCategory[]> {
     return this.client.product.findMany({
       where: { organizationId },

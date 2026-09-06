@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
-import { createPurchaseOrderRequestSchema } from "@pos/shared";
+import { createPurchaseOrderRequestSchema, receivePurchaseOrderRequestSchema } from "@pos/shared";
 import { AuthGuard } from "../../shared/security/auth.guard.js";
 import { RolesGuard } from "../../shared/security/roles.guard.js";
 import { Roles } from "../../shared/security/roles.decorator.js";
@@ -42,9 +42,11 @@ export class PurchaseOrdersController {
   async receive(
     @Param("storeId") storeId: string,
     @Param("purchaseOrderId") purchaseOrderId: string,
+    @Body() body: unknown,
     @CurrentAuth() auth: AuthContext
   ) {
-    const purchaseOrder = await this.receivePurchaseOrder.execute(auth.organizationId, storeId, purchaseOrderId);
+    const input = receivePurchaseOrderRequestSchema.parse(body);
+    const purchaseOrder = await this.receivePurchaseOrder.execute(auth.organizationId, storeId, purchaseOrderId, input);
     return toPurchaseOrderResponse(purchaseOrder);
   }
 

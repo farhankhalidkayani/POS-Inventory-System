@@ -13,6 +13,7 @@ const INITIAL_FORM_STATE = {
   name: "",
   priceDollars: "",
   categoryId: "",
+  barcode: "",
 };
 
 export function ProductForm() {
@@ -37,6 +38,7 @@ export function ProductForm() {
       name: form.name,
       priceCents,
       categoryId: form.categoryId || undefined,
+      barcode: form.barcode || undefined,
     });
     setForm(INITIAL_FORM_STATE);
   }
@@ -67,16 +69,24 @@ export function ProductForm() {
           required
         />
       </div>
-      <Input
-        label="Price (USD)"
-        name="priceDollars"
-        type="number"
-        step="0.01"
-        min="0"
-        value={form.priceDollars}
-        onChange={(event) => setForm((prev) => ({ ...prev, priceDollars: event.target.value }))}
-        required
-      />
+      <div className="grid grid-cols-2 gap-3">
+        <Input
+          label="Price (USD)"
+          name="priceDollars"
+          type="number"
+          step="0.01"
+          min="0"
+          value={form.priceDollars}
+          onChange={(event) => setForm((prev) => ({ ...prev, priceDollars: event.target.value }))}
+          required
+        />
+        <Input
+          label="Barcode (optional)"
+          name="barcode"
+          value={form.barcode}
+          onChange={(event) => setForm((prev) => ({ ...prev, barcode: event.target.value }))}
+        />
+      </div>
       <div className="flex flex-col gap-1">
         <label htmlFor="categoryId" className="text-sm font-medium text-slate-700">
           Category

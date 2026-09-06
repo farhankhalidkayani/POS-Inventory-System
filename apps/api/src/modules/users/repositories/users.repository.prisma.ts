@@ -18,4 +18,8 @@ export class PrismaUsersRepository implements UsersRepository {
   async findById(organizationId: string, id: string): Promise<User | null> {
     return this.client.user.findFirst({ where: { id, organizationId } });
   }
+
+  async listByOrganization(organizationId: string): Promise<User[]> {
+    return this.client.user.findMany({ where: { organizationId }, orderBy: { firstName: "asc" } });
+  }
 }

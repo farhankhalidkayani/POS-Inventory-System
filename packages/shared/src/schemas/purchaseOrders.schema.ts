@@ -24,6 +24,17 @@ export const purchaseOrderLineItemResponseSchema = z.object({
 });
 export type PurchaseOrderLineItemResponse = z.infer<typeof purchaseOrderLineItemResponseSchema>;
 
+export const receivePurchaseOrderLineItemRequestSchema = z.object({
+  lineItemId: z.string(),
+  quantityReceived: z.number().int().positive(),
+});
+export type ReceivePurchaseOrderLineItemRequest = z.infer<typeof receivePurchaseOrderLineItemRequestSchema>;
+
+export const receivePurchaseOrderRequestSchema = z.object({
+  lineItems: z.array(receivePurchaseOrderLineItemRequestSchema).min(1),
+});
+export type ReceivePurchaseOrderRequest = z.infer<typeof receivePurchaseOrderRequestSchema>;
+
 export const purchaseOrderResponseSchema = z.object({
   id: z.string(),
   storeId: z.string(),

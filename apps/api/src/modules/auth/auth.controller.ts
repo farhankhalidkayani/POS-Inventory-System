@@ -13,7 +13,7 @@ import { toAuthSessionResponse, toCurrentUserResponse } from "./dto/auth.mapper.
 
 export const REFRESH_TOKEN_COOKIE = "pos_refresh_token";
 
-const REFRESH_COOKIE_OPTIONS = {
+export const REFRESH_COOKIE_OPTIONS = {
   httpOnly: true,
   sameSite: "lax" as const,
   path: "/api/auth",

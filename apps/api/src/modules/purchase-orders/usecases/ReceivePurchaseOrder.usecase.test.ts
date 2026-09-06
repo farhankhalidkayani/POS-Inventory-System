@@ -84,10 +84,12 @@ describe("ReceivePurchaseOrderUseCase", () => {
     const unitOfWork: PurchaseOrdersUnitOfWork = { runInTransaction: vi.fn() };
     const useCase = new ReceivePurchaseOrderUseCase(purchaseOrdersRepository, unitOfWork);
 
-    await expect(useCase.execute("org_1", "store_1", "po_1")).rejects.toBeInstanceOf(NotFoundError);
+    await expect(
+      useCase.execute("org_1", "store_1", "po_1", { lineItems: [{ lineItemId: "li_1", quantityReceived: 10 }] })
+    ).rejects.toBeInstanceOf(NotFoundError);
   });
 
-  it("throws ValidationError when the purchase order is not in ORDERED status", async () => {
+  it("throws ValidationError when the purchase order is already fully RECEIVED or CANCELLED", async () => {
     const repositories = buildRepositories(0);
     const purchaseOrdersRepository = {
       ...repositories.purchaseOrders,
@@ -96,10 +98,28 @@ describe("ReceivePurchaseOrderUseCase", () => {
     const unitOfWork: PurchaseOrdersUnitOfWork = { runInTransaction: vi.fn() };
     const useCase = new ReceivePurchaseOrderUseCase(purchaseOrdersRepository, unitOfWork);
 
-    await expect(useCase.execute("org_1", "store_1", "po_1")).rejects.toBeInstanceOf(ValidationError);
+    await expect(
+      useCase.execute("org_1", "store_1", "po_1", { lineItems: [{ lineItemId: "li_1", quantityReceived: 10 }] })
+    ).rejects.toBeInstanceOf(ValidationError);
   });
 
-  it("increments inventory, records a RECEIVE movement, marks line items received, and sets status RECEIVED", async () => {
+  it("throws ValidationError when receiving more than the remaining ordered quantity", async () => {
+    const repositories = buildRepositories(0);
+    const purchaseOrdersRepository = {
+      ...repositories.purchaseOrders,
+      findById: vi.fn().mockResolvedValue(buildPurchaseOrder({ lineItems: [
+        { id: "li_1", purchaseOrderId: "po_1", productId: "product_1", productName: "Widget", quantityOrdered: 10, quantityReceived: 6, unitCostCents: 100 },
+      ] })),
+    };
+    const unitOfWork: PurchaseOrdersUnitOfWork = { runInTransaction: vi.fn() };
+    const useCase = new ReceivePurchaseOrderUseCase(purchaseOrdersRepository, unitOfWork);
+
+    await expect(
+      useCase.execute("org_1", "store_1", "po_1", { lineItems: [{ lineItemId: "li_1", quantityReceived: 5 }] })
+    ).rejects.toBeInstanceOf(ValidationError);
+  });
+
+  it("partially receives a line item, leaving the order PARTIALLY_RECEIVED with no receivedAt", async () => {
     const repositories = buildRepositories(5);
     const purchaseOrdersRepository = {
       ...repositories.purchaseOrders,
@@ -110,12 +130,41 @@ describe("ReceivePurchaseOrderUseCase", () => {
     };
     const useCase = new ReceivePurchaseOrderUseCase(purchaseOrdersRepository, unitOfWork);
 
-    const result = await useCase.execute("org_1", "store_1", "po_1");
+    const result = await useCase.execute("org_1", "store_1", "po_1", {
+      lineItems: [{ lineItemId: "li_1", quantityReceived: 4 }],
+    });
 
-    expect(repositories.inventoryItems.setQuantity).toHaveBeenCalledWith("org_1", "store_1", "product_1", 15);
+    expect(repositories.inventoryItems.setQuantity).toHaveBeenCalledWith("org_1", "store_1", "product_1", 9);
     expect(repositories.stockMovements.create).toHaveBeenCalledWith(
-      expect.objectContaining({ type: "RECEIVE", quantityChange: 10 })
+      expect.objectContaining({ type: "RECEIVE", quantityChange: 4 })
     );
+    expect(repositories.purchaseOrders.markLineItemReceived).toHaveBeenCalledWith("li_1", 4);
+    expect(repositories.purchaseOrders.updateStatus).toHaveBeenCalledWith("po_1", "PARTIALLY_RECEIVED", undefined);
+    expect(result.status).toBe("PARTIALLY_RECEIVED");
+  });
+
+  it("marks the order RECEIVED with a receivedAt once the last remaining quantity comes in", async () => {
+    const repositories = buildRepositories(5);
+    const purchaseOrdersRepository = {
+      ...repositories.purchaseOrders,
+      findById: vi.fn().mockResolvedValue(
+        buildPurchaseOrder({
+          status: "PARTIALLY_RECEIVED",
+          lineItems: [
+            { id: "li_1", purchaseOrderId: "po_1", productId: "product_1", productName: "Widget", quantityOrdered: 10, quantityReceived: 4, unitCostCents: 100 },
+          ],
+        })
+      ),
+    };
+    const unitOfWork: PurchaseOrdersUnitOfWork = {
+      runInTransaction: vi.fn().mockImplementation((work) => work(repositories)),
+    };
+    const useCase = new ReceivePurchaseOrderUseCase(purchaseOrdersRepository, unitOfWork);
+
+    const result = await useCase.execute("org_1", "store_1", "po_1", {
+      lineItems: [{ lineItemId: "li_1", quantityReceived: 6 }],
+    });
+
     expect(repositories.purchaseOrders.markLineItemReceived).toHaveBeenCalledWith("li_1", 10);
     expect(repositories.purchaseOrders.updateStatus).toHaveBeenCalledWith("po_1", "RECEIVED", expect.any(Date));
     expect(result.status).toBe("RECEIVED");

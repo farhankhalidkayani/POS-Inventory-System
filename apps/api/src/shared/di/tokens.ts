@@ -17,3 +17,5 @@ export const PURCHASE_ORDERS_UNIT_OF_WORK = Symbol("PurchaseOrdersUnitOfWork");
 export const CUSTOMERS_REPOSITORY = Symbol("CustomersRepository");
 export const DISCOUNTS_REPOSITORY = Symbol("DiscountsRepository");
 export const PAYMENT_PROVIDER = Symbol("PaymentProvider");
+export const INVITES_REPOSITORY = Symbol("InvitesRepository");
+export const INVITES_UNIT_OF_WORK = Symbol("InvitesUnitOfWork");

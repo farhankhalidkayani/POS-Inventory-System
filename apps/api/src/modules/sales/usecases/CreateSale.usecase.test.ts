@@ -83,6 +83,7 @@ function buildRepositories(inventoryQuantity: number): SalesUnitOfWorkRepositori
     products: {
       findById: vi.fn().mockResolvedValue(buildProduct()),
       findBySku: vi.fn(),
+      findByBarcode: vi.fn(),
       create: vi.fn(),
       list: vi.fn(),
       update: vi.fn(),

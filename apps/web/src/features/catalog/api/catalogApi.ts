@@ -31,4 +31,8 @@ export const catalogApi = {
   deleteProduct(accessToken: string, productId: string): Promise<void> {
     return apiFetch<void>(`/api/products/${productId}`, { method: "DELETE", accessToken });
   },
+
+  findProductByBarcode(accessToken: string, barcode: string): Promise<ProductResponse> {
+    return apiFetch<ProductResponse>(`/api/products/barcode/${encodeURIComponent(barcode)}`, { accessToken });
+  },
 };

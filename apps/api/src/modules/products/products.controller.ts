@@ -9,6 +9,7 @@ import { CreateProductUseCase } from "./usecases/CreateProduct.usecase.js";
 import { ListProductsUseCase } from "./usecases/ListProducts.usecase.js";
 import { UpdateProductUseCase } from "./usecases/UpdateProduct.usecase.js";
 import { DeleteProductUseCase } from "./usecases/DeleteProduct.usecase.js";
+import { FindProductByBarcodeUseCase } from "./usecases/FindProductByBarcode.usecase.js";
 import { toProductResponse } from "./dto/product.mapper.js";
 
 @Controller("api/products")
@@ -18,13 +19,20 @@ export class ProductsController {
     private readonly createProduct: CreateProductUseCase,
     private readonly listProducts: ListProductsUseCase,
     private readonly updateProduct: UpdateProductUseCase,
-    private readonly deleteProduct: DeleteProductUseCase
+    private readonly deleteProduct: DeleteProductUseCase,
+    private readonly findProductByBarcode: FindProductByBarcodeUseCase
   ) {}
 
   @Get()
   async list(@CurrentAuth() auth: AuthContext) {
     const products = await this.listProducts.execute(auth.organizationId);
     return products.map(toProductResponse);
+  }
+
+  @Get("barcode/:barcode")
+  async findByBarcode(@Param("barcode") barcode: string, @CurrentAuth() auth: AuthContext) {
+    const product = await this.findProductByBarcode.execute(auth.organizationId, barcode);
+    return toProductResponse(product);
   }
 
   @Post()

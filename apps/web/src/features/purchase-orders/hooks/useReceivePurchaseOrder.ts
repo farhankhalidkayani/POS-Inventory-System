@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { ReceivePurchaseOrderRequest } from "@pos/shared";
 import { useAuthSession } from "../../auth";
 import { storeInventoryQueryKey } from "../../inventory";
 import { purchaseOrdersApi } from "../api/purchaseOrdersApi";
@@ -9,8 +10,8 @@ export function useReceivePurchaseOrder(storeId: string | undefined) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (purchaseOrderId: string) =>
-      purchaseOrdersApi.receivePurchaseOrder(session!.accessToken, storeId!, purchaseOrderId),
+    mutationFn: ({ purchaseOrderId, input }: { purchaseOrderId: string; input: ReceivePurchaseOrderRequest }) =>
+      purchaseOrdersApi.receivePurchaseOrder(session!.accessToken, storeId!, purchaseOrderId, input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: storePurchaseOrdersQueryKey(storeId ?? "") });
       queryClient.invalidateQueries({ queryKey: storeInventoryQueryKey(storeId ?? "") });

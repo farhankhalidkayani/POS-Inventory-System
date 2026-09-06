@@ -30,6 +30,7 @@ model Organization {
   purchaseOrders PurchaseOrder[]
   customers      Customer[]
   discounts      Discount[]
+  invites        Invite[]
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
 }
@@ -188,6 +189,7 @@ model SaleLineItem {
 
 enum PurchaseOrderStatus {
   ORDERED
+  PARTIALLY_RECEIVED
   RECEIVED
   CANCELLED
 }
@@ -271,5 +273,26 @@ model Discount {
   updatedAt      DateTime     @updatedAt
 
   @@unique([organizationId, code])
+  @@index([organizationId])
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  REVOKED
+}
+
+model Invite {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  email          String
+  role           Role
+  token          String       @unique
+  status         InviteStatus @default(PENDING)
+  expiresAt      DateTime
+  acceptedAt     DateTime?
+  createdAt      DateTime     @default(now())
+
   @@index([organizationId])
 }

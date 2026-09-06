@@ -7,6 +7,7 @@ import { CreateProductUseCase } from "./usecases/CreateProduct.usecase.js";
 import { ListProductsUseCase } from "./usecases/ListProducts.usecase.js";
 import { UpdateProductUseCase } from "./usecases/UpdateProduct.usecase.js";
 import { DeleteProductUseCase } from "./usecases/DeleteProduct.usecase.js";
+import { FindProductByBarcodeUseCase } from "./usecases/FindProductByBarcode.usecase.js";
 import { ProductsController } from "./products.controller.js";
 
 @Module({
@@ -22,6 +23,7 @@ import { ProductsController } from "./products.controller.js";
     ListProductsUseCase,
     UpdateProductUseCase,
     DeleteProductUseCase,
+    FindProductByBarcodeUseCase,
   ],
   exports: [PRODUCTS_REPOSITORY],
 })

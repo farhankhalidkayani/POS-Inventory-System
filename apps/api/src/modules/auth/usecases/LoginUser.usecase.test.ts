@@ -27,6 +27,7 @@ describe("LoginUserUseCase", () => {
       findByEmail: vi.fn().mockResolvedValue(null),
       create: vi.fn(),
       findById: vi.fn(),
+      listByOrganization: vi.fn(),
     };
     const organizationsRepository = {} as OrganizationsRepository;
     const storesRepository = {} as StoresRepository;
@@ -52,6 +53,7 @@ describe("LoginUserUseCase", () => {
       findByEmail: vi.fn().mockResolvedValue(user),
       create: vi.fn(),
       findById: vi.fn(),
+      listByOrganization: vi.fn(),
     };
     const organizationsRepository = {} as OrganizationsRepository;
     const storesRepository = {} as StoresRepository;
@@ -87,6 +89,7 @@ describe("LoginUserUseCase", () => {
       findByEmail: vi.fn().mockResolvedValue(user),
       create: vi.fn(),
       findById: vi.fn(),
+      listByOrganization: vi.fn(),
     };
     const organizationsRepository: OrganizationsRepository = {
       findById: vi.fn().mockResolvedValue(organization),

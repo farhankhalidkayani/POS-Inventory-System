@@ -1,4 +1,4 @@
-import type { CreatePurchaseOrderRequest, PurchaseOrderResponse } from "@pos/shared";
+import type { CreatePurchaseOrderRequest, PurchaseOrderResponse, ReceivePurchaseOrderRequest } from "@pos/shared";
 import { apiFetch } from "../../../shared/api/httpClient";
 
 export const purchaseOrdersApi = {
@@ -18,10 +18,16 @@ export const purchaseOrdersApi = {
     });
   },
 
-  receivePurchaseOrder(accessToken: string, storeId: string, purchaseOrderId: string): Promise<PurchaseOrderResponse> {
+  receivePurchaseOrder(
+    accessToken: string,
+    storeId: string,
+    purchaseOrderId: string,
+    input: ReceivePurchaseOrderRequest
+  ): Promise<PurchaseOrderResponse> {
     return apiFetch<PurchaseOrderResponse>(`/api/stores/${storeId}/purchase-orders/${purchaseOrderId}/receive`, {
       method: "POST",
       accessToken,
+      body: input,
     });
   },
 
